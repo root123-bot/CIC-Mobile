@@ -1,0 +1,13 @@
+
+    ISSUES #1
+TypeError: Cannot read property 'getString' of undefined
+https://github.com/tttstudios/react-native-otp-input/issues/143
+
+i don't know where this coming from but what i did here is install version of clipboard^1.5.1 and otp-input^1.5.1
+then here i downloaded 'expo-clipboard' i removed 'node-modules' and 'package_lock.json' then i installed the packages
+using 'npm install' and start my server again.
+
+
+    ISSUE #2
+// keyboard loses focus only in emulator but not i real device https://github.com/tttstudios/react-native-otp-input/issues/174
+// so issue ya keyboard ku-totokea na ku-lose focus inatokea kwenye iOS emulator`

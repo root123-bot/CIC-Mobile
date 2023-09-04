@@ -1,0 +1,3 @@
+when posting to the api of django somethimes we receive "Forbidden (CSRF cookie not set)" its look it tell us to provide the 
+"csrf_token" but the issue here we use "api" so no need to have thsi "token" i debug this error and REALIZE THAT I FORGOT TO 
+ADD/SET THE "url" IM POSTING THE DATA TO THE "urls.py" THAT WHY IT GIVE ME THIS ERROR.
