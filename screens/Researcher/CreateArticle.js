@@ -6,7 +6,10 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  Keyboard,
   Platform,
+  Pressable,
+  KeyboardAvoidingView,
 } from "react-native";
 import { Button, HelperText, TextInput } from "react-native-paper";
 import { CustomLine } from "../../components/Ui";
@@ -16,17 +19,21 @@ import { COLORS } from "../../constants/colors";
 import { CreateArticleHandler } from "../../utils/requests";
 import { AppContext } from "../../store/context";
 import { TransparentPopUpIconMessage } from "../../components/Messages";
+import { Picker } from "@react-native-picker/picker";
 
 function CreateArticle({ navigation }) {
   const AppCtx = useContext(AppContext);
 
   const [mediaFiles, setMediaFiles] = useState([]);
   const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("KILIMO");
   const [content, setContent] = useState("");
   const [showAnimation, setShowAnimation] = useState(false);
   const [formSubmitLoader, setFormSubmitLoader] = useState(false);
   const [message, setMessage] = useState("");
   const [icon, setIcon] = useState("");
+  const [toggleCategory, setToggleCategory] = useState("none");
+  const [categoryIcons, setCategoryIcons] = useState("chevron-down");
 
   async function selectFile() {
     try {
@@ -174,215 +181,288 @@ function CreateArticle({ navigation }) {
         pointerEvents={formSubmitLoader ? "none" : "auto"}
       >
         <ScrollView>
-          <View>
-            <View style={{ marginVertical: 10 }}>
-              <View
-                style={{
-                  width: "100%",
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                }}
-              >
+          <KeyboardAvoidingView
+            behavior={Platform === "ios" ? "padding" : "height"}
+          >
+            <View>
+              <View style={{ marginVertical: 10 }}>
                 <View
                   style={{
-                    width: "55%",
+                    width: "100%",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <View
+                    style={{
+                      width: "55%",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: "montserrat-17",
+                      }}
+                      numberOfLines={1}
+                    >
+                      Embed file
+                    </Text>
+                    <HelperText
+                      style={{
+                        marginBottom: 0,
+                        paddingBottom: 0,
+                      }}
+                      numberOfLines={1}
+                      padding="none"
+                    >
+                      Tap respective icon
+                    </HelperText>
+                    <HelperText
+                      style={{
+                        marginTop: 0,
+                        paddingTop: 0,
+                      }}
+                      numberOfLines={1}
+                      padding="none"
+                    >
+                      ** Only .pdf, .mp3, .mp4, *images
+                    </HelperText>
+                  </View>
+                  <View
+                    style={{
+                      width: "45%",
+                      flexDirection: "row",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <TouchableOpacity
+                      style={{ marginRight: 8 }}
+                      onPress={selectFile}
+                    >
+                      <Image
+                        source={require("../../assets/images/doc.png")}
+                        style={{
+                          width: 27,
+                          height: 27,
+                        }}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ marginRight: 8 }}
+                      onPress={loadImageHandler}
+                    >
+                      <Image
+                        source={require("../../assets/images/photo.png")}
+                        style={{
+                          width: 27,
+                          height: 27,
+                        }}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ marginRight: 8 }}
+                      onPress={importAudio}
+                    >
+                      <Image
+                        source={require("../../assets/images/music-file-2.png")}
+                        style={{
+                          width: 27,
+                          height: 27,
+                        }}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ marginRight: 8 }}
+                      onPress={importVideo}
+                    >
+                      <Image
+                        source={require("../../assets/images/video-camera-2.png")}
+                        style={{
+                          width: 27,
+                          height: 27,
+                        }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <CustomLine color={"grey"} />
+              </View>
+              <TextInput
+                onChangeText={(text) => setTitle(text)}
+                label="Title"
+                mode="outlined"
+                style={styles.textInput}
+                activeOutlineColor={COLORS.primary}
+              />
+              {Platform.OS === "ios" ? (
+                <>
+                  <Pressable
+                    onPress={() => {
+                      if (toggleCategory === "none") {
+                        setToggleCategory("flex");
+                        setCategoryIcons("chevron-up");
+                        Keyboard.dismiss();
+                      } else {
+                        setToggleCategory("none");
+                        setCategoryIcons("chevron-down");
+                      }
+                    }}
+                  >
+                    <View pointerEvents="none">
+                      <TextInput
+                        label="Category"
+                        editable={false}
+                        mode="outlined"
+                        value={category}
+                        style={[styles.textInput]}
+                        textColor={"black"}
+                        underlineColor={COLORS.primary}
+                        right={<TextInput.Icon icon={categoryIcons} />}
+                        activeOutlineColor={COLORS.primary}
+                      />
+                    </View>
+                  </Pressable>
+                  <Picker
+                    mode="dropdown"
+                    selectedValue={category}
+                    onValueChange={(text) => setCategory(text)}
+                    style={[styles.pickerStyling, { display: toggleCategory }]}
+                  >
+                    <Picker.Item label="KILIMO" value="KILIMO" />
+                    <Picker.Item label="MAZINGIRA" value="MAZINGIRA" />
+                  </Picker>
+                </>
+              ) : (
+                <>
+                  <View style={{ marginTop: "2%" }}>
+                    <Text style={{ marginLeft: "3%" }}>Category</Text>
+                    <View
+                      style={{
+                        borderColor: "white",
+                        borderRadius: 5,
+                        borderWidth: 1,
+                      }}
+                    >
+                      <Picker
+                        mode="dropdown"
+                        style={{
+                          backgroundColor: "white",
+                        }}
+                        selectedValue={category}
+                        onValueChange={(text) => setCategory(text)}
+                      >
+                        <Picker.Item label="KILIMO" value="KILIMO" />
+                        <Picker.Item label="MAZINGIRA" value="MAZINGIRA" />
+                      </Picker>
+                    </View>
+                  </View>
+                </>
+              )}
+              <TextInput
+                label="Content"
+                mode="outlined"
+                multiline={true}
+                onChangeText={(text) => setContent(text)}
+                style={[
+                  styles.textInput,
+                  {
+                    paddingVertical: 15,
+                    textAlignVertical: "top",
+                  },
+                ]}
+                activeOutlineColor={COLORS.primary}
+                numberOfLines={20}
+                // style={styles.textInput}
+              />
+              {/* box to display uploaded files */}
+              {mediaFiles.length > 0 && (
+                <View
+                  style={{
+                    width: "100%",
+                    minHeight: 100,
+                    borderColor: COLORS.primary,
+                    borderWidth: 1,
+                    padding: 15,
+                    borderStyle: "dashed",
                   }}
                 >
                   <Text
                     style={{
                       fontFamily: "montserrat-17",
                     }}
-                    numberOfLines={1}
                   >
-                    Embed file
+                    Attached files
                   </Text>
-                  <HelperText
-                    style={{
-                      marginBottom: 0,
-                      paddingBottom: 0,
-                    }}
-                    numberOfLines={1}
-                    padding="none"
-                  >
-                    Tap respective icon
-                  </HelperText>
-                  <HelperText
-                    style={{
-                      marginTop: 0,
-                      paddingTop: 0,
-                    }}
-                    numberOfLines={1}
-                    padding="none"
-                  >
-                    ** Only .pdf, .mp3, .mp4, *images
-                  </HelperText>
-                </View>
-                <View
-                  style={{
-                    width: "45%",
-                    flexDirection: "row",
-                    justifyContent: "flex-end",
-                  }}
-                >
-                  <TouchableOpacity
-                    style={{ marginRight: 8 }}
-                    onPress={selectFile}
-                  >
-                    <Image
-                      source={require("../../assets/images/doc.png")}
+                  {/* list of files */}
+                  {mediaFiles.map((file, index) => (
+                    <View
+                      key={index}
                       style={{
-                        width: 27,
-                        height: 27,
-                      }}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{ marginRight: 8 }}
-                    onPress={loadImageHandler}
-                  >
-                    <Image
-                      source={require("../../assets/images/photo.png")}
-                      style={{
-                        width: 27,
-                        height: 27,
-                      }}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{ marginRight: 8 }}
-                    onPress={importAudio}
-                  >
-                    <Image
-                      source={require("../../assets/images/music-file-2.png")}
-                      style={{
-                        width: 27,
-                        height: 27,
-                      }}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{ marginRight: 8 }}
-                    onPress={importVideo}
-                  >
-                    <Image
-                      source={require("../../assets/images/video-camera-2.png")}
-                      style={{
-                        width: 27,
-                        height: 27,
-                      }}
-                    />
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <CustomLine color={"grey"} />
-            </View>
-            <TextInput
-              onChangeText={(text) => setTitle(text)}
-              label="Title"
-              mode="outlined"
-              style={styles.textInput}
-              activeOutlineColor={COLORS.primary}
-            />
-            <TextInput
-              label="Content"
-              mode="outlined"
-              multiline={true}
-              onChangeText={(text) => setContent(text)}
-              style={[
-                styles.textInput,
-                {
-                  paddingVertical: 15,
-                  textAlignVertical: "top",
-                },
-              ]}
-              activeOutlineColor={COLORS.primary}
-              numberOfLines={20}
-              // style={styles.textInput}
-            />
-            {/* box to display uploaded files */}
-            {mediaFiles.length > 0 && (
-              <View
-                style={{
-                  width: "100%",
-                  minHeight: 100,
-                  borderColor: COLORS.primary,
-                  borderWidth: 1,
-                  padding: 15,
-                  borderStyle: "dashed",
-                }}
-              >
-                <Text
-                  style={{
-                    fontFamily: "montserrat-17",
-                  }}
-                >
-                  Attached files
-                </Text>
-                {/* list of files */}
-                {mediaFiles.map((file, index) => (
-                  <View
-                    key={index}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      marginVertical: 5,
-                    }}
-                  >
-                    <Image
-                      source={
-                        file.name.split(".")[
-                          file.name.split(".").length - 1
-                        ] === "pdf"
-                          ? require("../../assets/images/doc.png")
-                          : file.name.split(".")[
-                              file.name.split(".").length - 1
-                            ] === "mp3"
-                          ? require("../../assets/images/music-file-2.png")
-                          : file.name.split(".")[
-                              file.name.split(".").length - 1
-                            ] === "mp4"
-                          ? require("../../assets/images/video-camera-2.png")
-                          : require("../../assets/images/photo.png")
-                      }
-                      style={{ width: 16, height: 16 }}
-                    />
-                    <Text
-                      style={{
-                        marginLeft: 5,
-                        fontSize: 16,
-                        fontFamily: "overpass-reg",
-                      }}
-                    >
-                      {`${file.name.split(".")[0].substr(0, 10) + "..."} ${
-                        file.name.split(".")[file.name.split(".").length - 1]
-                      }`}
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setMediaFiles((prevState) => {
-                          prevState.splice(index, 1);
-                          return [...prevState.splice(index, 1)];
-                        });
-                        console.log("media files ", mediaFiles);
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginVertical: 5,
                       }}
                     >
                       <Image
-                        source={require("../../assets/icons/cancel.png")}
-                        style={{ width: 16, height: 16, marginLeft: 7 }}
+                        source={
+                          file.name.split(".")[
+                            file.name.split(".").length - 1
+                          ] === "pdf"
+                            ? require("../../assets/images/doc.png")
+                            : file.name.split(".")[
+                                file.name.split(".").length - 1
+                              ] === "mp3"
+                            ? require("../../assets/images/music-file-2.png")
+                            : file.name.split(".")[
+                                file.name.split(".").length - 1
+                              ] === "mp4"
+                            ? require("../../assets/images/video-camera-2.png")
+                            : require("../../assets/images/photo.png")
+                        }
+                        style={{ width: 16, height: 16 }}
                       />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-          <Button
-            onPress={submitDataHandler}
-            mode="contained"
-            style={{ marginTop: 20 }}
-          >
-            Create Article
-          </Button>
+                      <Text
+                        style={{
+                          marginLeft: 5,
+                          fontSize: 16,
+                          fontFamily: "overpass-reg",
+                        }}
+                      >
+                        {`${file.name.split(".")[0].substr(0, 10) + "..."} ${
+                          file.name.split(".")[file.name.split(".").length - 1]
+                        }`}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setMediaFiles((prevState) => {
+                            prevState.splice(index, 1);
+                            return [...prevState.splice(index, 1)];
+                          });
+                          console.log("media files ", mediaFiles);
+                        }}
+                      >
+                        <Image
+                          source={require("../../assets/icons/cancel.png")}
+                          style={{ width: 16, height: 16, marginLeft: 7 }}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+            <Button
+              onPress={submitDataHandler}
+              mode="contained"
+              style={{ marginTop: 20 }}
+            >
+              Create Article
+            </Button>
+          </KeyboardAvoidingView>
+          <View
+            style={{
+              height: 100,
+            }}
+          ></View>
         </ScrollView>
       </View>
     </View>
