@@ -24,7 +24,9 @@ function LoginScreen({ route, navigation }) {
 
   const [showAnimation, setShowAnimation] = useState(false);
   const [formSubmitLoader, setFormSubmitLoader] = useState(false);
-  const [formattedValue, setFormattedValue] = useState("+255");
+  const [formattedValue, setFormattedValue] = useState(
+    AppCtx.lastLoginPhoneNumber ? AppCtx.lastLoginPhoneNumber : "+255"
+  );
   const [message, setMessage] = useState("");
   const [icon, setIcon] = useState("");
   const [phone, setPhone] = useState({

@@ -58,7 +58,12 @@ function CreateArticle({ navigation }) {
         quality: 0.2,
       });
       if (!captured.canceled) {
-        setMediaFiles((prevState) => [...prevState, captured]);
+        const serialized_captured = {
+          ...captured.assets[0],
+          name: captured.assets[0].fileName,
+        };
+        console.log("Here is what captured ", serialized_captured);
+        setMediaFiles((prevState) => [...prevState, serialized_captured]);
       }
     } catch (error) {
       console.log(error);
@@ -94,6 +99,7 @@ function CreateArticle({ navigation }) {
     setFormSubmitLoader(true);
     const formData = new FormData();
     formData.append("title", title);
+    formData.append("category", category);
     formData.append("content", content);
     formData.append("user_id", AppCtx.usermetadata.get_user_id);
     let counter = 0;
@@ -180,7 +186,7 @@ function CreateArticle({ navigation }) {
         style={styles.container}
         pointerEvents={formSubmitLoader ? "none" : "auto"}
       >
-        <ScrollView>
+        <ScrollView showsVerticalScrollIndicator={false}>
           <KeyboardAvoidingView
             behavior={Platform === "ios" ? "padding" : "height"}
           >
@@ -434,8 +440,14 @@ function CreateArticle({ navigation }) {
                       <TouchableOpacity
                         onPress={() => {
                           setMediaFiles((prevState) => {
+                            console.log(
+                              "index ",
+                              index,
+                              " length ",
+                              prevState.length
+                            );
                             prevState.splice(index, 1);
-                            return [...prevState.splice(index, 1)];
+                            return [...prevState];
                           });
                           console.log("media files ", mediaFiles);
                         }}
@@ -460,7 +472,7 @@ function CreateArticle({ navigation }) {
           </KeyboardAvoidingView>
           <View
             style={{
-              height: 100,
+              height: 150,
             }}
           ></View>
         </ScrollView>
