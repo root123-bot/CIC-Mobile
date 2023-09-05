@@ -30,10 +30,12 @@ function ViewEditArticle({ navigation, route }) {
   );
 
   console.log("target ", targettedArticle);
-  const [mediaFiles, setMediaFiles] = useState([]);
+  const [mediaFiles, setMediaFiles] = useState(
+    targettedArticle.posted_media.map((val) => ({ uri: val, source: "server" }))
+  );
   const [title, setTitle] = useState(targettedArticle.title);
   const [category, setCategory] = useState(
-    targgettedArticle.category ? targgettedArticle.category : "KILIMO"
+    targettedArticle.category ? targettedArticle.category : "KILIMO"
   );
   const [content, setContent] = useState(targettedArticle.content);
   const [showAnimation, setShowAnimation] = useState(false);
