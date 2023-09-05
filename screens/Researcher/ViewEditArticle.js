@@ -20,6 +20,9 @@ import { CreateArticleHandler } from "../../utils/requests";
 import { AppContext } from "../../store/context";
 import { TransparentPopUpIconMessage } from "../../components/Messages";
 import { Picker } from "@react-native-picker/picker";
+import { BASE_URL } from "../../constants/domain";
+import { MaterialIcons } from "@expo/vector-icons";
+import * as ImageCache from "react-native-expo-image-cache";
 
 function ViewEditArticle({ navigation, route }) {
   const { articleId } = route.params;
@@ -410,67 +413,246 @@ function ViewEditArticle({ navigation, route }) {
                   >
                     Attached files
                   </Text>
-                  {/* list of files */}
-                  {mediaFiles.map((file, index) => (
-                    <View
-                      key={index}
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        marginVertical: 5,
-                      }}
+                  {/* display uploaded images */}
+                  <View
+                    style={{
+                      width: "100%",
+                      marginVertical: 15,
+                    }}
+                  >
+                    <ScrollView
+                      horizontal={true}
+                      showsHorizontalScrollIndicator={false}
+                      //   style={{
+                      //     flexDirection: "row",
+                      //     marginTop: 10,
+                      //   }}
                     >
-                      <Image
-                        source={
-                          file.name.split(".")[
-                            file.name.split(".").length - 1
-                          ] === "pdf"
-                            ? require("../../assets/images/doc.png")
-                            : file.name.split(".")[
-                                file.name.split(".").length - 1
-                              ] === "mp3"
-                            ? require("../../assets/images/music-file-2.png")
-                            : file.name.split(".")[
-                                file.name.split(".").length - 1
-                              ] === "mp4"
-                            ? require("../../assets/images/video-camera-2.png")
-                            : require("../../assets/images/photo.png")
-                        }
-                        style={{ width: 16, height: 16 }}
-                      />
-                      <Text
+                      <View
                         style={{
-                          marginLeft: 5,
-                          fontSize: 16,
-                          fontFamily: "overpass-reg",
+                          flexDirection: "row",
+                          justifyContent: "space-between",
                         }}
                       >
-                        {`${file.name.split(".")[0].substr(0, 10) + "..."} ${
-                          file.name.split(".")[file.name.split(".").length - 1]
-                        }`}
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setMediaFiles((prevState) => {
-                            console.log(
-                              "index ",
-                              index,
-                              " length ",
-                              prevState.length
-                            );
-                            prevState.splice(index, 1);
-                            return [...prevState];
-                          });
-                          console.log("media files ", mediaFiles);
+                        {mediaFiles
+                          .filter((val) => {
+                            if (val.source === "server") {
+                              return (
+                                val.uri.split(".")[
+                                  val.uri.split(".").length - 1
+                                ] === "png" ||
+                                val.uri.split(".")[
+                                  val.uri.split(".").length - 1
+                                ] === "jpg" ||
+                                val.uri.split(".")[
+                                  val.uri.split(".").length - 1
+                                ] === "png" ||
+                                val.uri.split(".")[
+                                  val.uri.split(".").length - 1
+                                ] === "jpeg"
+                              );
+                            } else {
+                              return (
+                                val.name.split(".")[
+                                  val.name.split(".").length - 1
+                                ] === "png" ||
+                                val.name.split(".")[
+                                  val.name.split(".").length - 1
+                                ] === "jpg" ||
+                                val.name.split(".")[
+                                  val.name.split(".").length - 1
+                                ] === "png" ||
+                                val.name.split(".")[
+                                  val.name.split(".").length - 1
+                                ] === "jpeg"
+                              );
+                            }
+                          })
+                          .map((media, index) => (
+                            <View
+                              style={{
+                                width: 120,
+                                height: 90,
+                                margin: 10,
+                              }}
+                            >
+                              {media.source === "server" ? (
+                                <ImageCache.Image
+                                  {...{
+                                    preview: `${BASE_URL}${media.uri}`,
+                                    uri: `${BASE_URL}${media.uri}`,
+                                    tint: "dark",
+                                    style: {
+                                      width: "100%",
+                                      borderRadius: 15,
+                                      height: "100%",
+                                    },
+                                  }}
+                                />
+                              ) : (
+                                <Image
+                                  source={{ uri: media.uri }}
+                                  style={{
+                                    width: "100%",
+                                    borderRadius: 15,
+                                    height: "100%",
+                                  }}
+                                />
+                              )}
+
+                              <View
+                                style={{
+                                  width: 30,
+                                  height: 30,
+                                  position: "absolute",
+                                  top: 0,
+                                  right: 0,
+                                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                                }}
+                              ></View>
+                              <TouchableOpacity
+                                style={{
+                                  position: "absolute",
+                                  top: 3,
+                                  right: 3,
+                                }}
+                              >
+                                <MaterialIcons
+                                  name="delete"
+                                  color={COLORS.danger}
+                                  size={24}
+                                />
+                              </TouchableOpacity>
+                            </View>
+                          ))}
+                      </View>
+                    </ScrollView>
+                  </View>
+                  {/* other files */}
+                  {mediaFiles
+                    .filter((val) => {
+                      if (val.source === "server") {
+                        return (
+                          val.uri.split(".")[val.uri.split(".").length - 1] !==
+                            "png" &&
+                          val.uri.split(".")[val.uri.split(".").length - 1] !==
+                            "jpg" &&
+                          val.uri.split(".")[val.uri.split(".").length - 1] !==
+                            "png" &&
+                          val.uri.split(".")[val.uri.split(".").length - 1] !==
+                            "jpeg"
+                        );
+                      } else {
+                        return (
+                          val.name.split(".")[
+                            val.name.split(".").length - 1
+                          ] !== "png" &&
+                          val.name.split(".")[
+                            val.name.split(".").length - 1
+                          ] !== "jpg" &&
+                          val.name.split(".")[
+                            val.name.split(".").length - 1
+                          ] !== "png" &&
+                          val.name.split(".")[
+                            val.name.split(".").length - 1
+                          ] !== "jpeg"
+                        );
+                      }
+                    })
+                    .map((file, index) => (
+                      <View
+                        key={index}
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          marginVertical: 5,
                         }}
                       >
                         <Image
-                          source={require("../../assets/icons/cancel.png")}
-                          style={{ width: 16, height: 16, marginLeft: 7 }}
+                          source={
+                            file.source === "server"
+                              ? file.uri.split(".")[
+                                  file.uri.split(".").length - 1
+                                ] === "pdf"
+                                ? require("../../assets/images/doc.png")
+                                : file.uri.split(".")[
+                                    file.uri.split(".").length - 1
+                                  ] === "mp3"
+                                ? require("../../assets/images/music-file-2.png")
+                                : file.uri.split(".")[
+                                    file.uri.split(".").length - 1
+                                  ] === "mp4"
+                                ? require("../../assets/images/video-camera-2.png")
+                                : require("../../assets/images/photo.png")
+                              : file.name.split(".")[
+                                  file.name.split(".").length - 1
+                                ] === "pdf"
+                              ? require("../../assets/images/doc.png")
+                              : file.name.split(".")[
+                                  file.name.split(".").length - 1
+                                ] === "mp3"
+                              ? require("../../assets/images/music-file-2.png")
+                              : file.name.split(".")[
+                                  file.name.split(".").length - 1
+                                ] === "mp4"
+                              ? require("../../assets/images/video-camera-2.png")
+                              : require("../../assets/images/photo.png")
+                          }
+                          style={{ width: 16, height: 16 }}
                         />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
+                        <Text
+                          style={{
+                            marginLeft: 5,
+                            fontSize: 16,
+                            fontFamily: "overpass-reg",
+                          }}
+                        >
+                          {file.source === "server"
+                            ? `${
+                                file.uri
+                                  .split("/")
+                                  [file.uri.split("/").length - 1].split(".")[0]
+                                  .substr(0, 10) + "..."
+                              } ${
+                                file.uri
+                                  .split("/")
+                                  [file.uri.split("/").length - 1].split(".")[
+                                  file.uri
+                                    .split("/")
+                                    [file.uri.split("/").length - 1].split(".")
+                                    .length - 1
+                                ]
+                              }`
+                            : `${
+                                file.name.split(".")[0].substr(0, 10) + "..."
+                              } ${
+                                file.name.split(".")[
+                                  file.name.split(".").length - 1
+                                ]
+                              }`}
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setMediaFiles((prevState) => {
+                              console.log(
+                                "index ",
+                                index,
+                                " length ",
+                                prevState.length
+                              );
+                              prevState.splice(index, 1);
+                              return [...prevState];
+                            });
+                            console.log("media files ", mediaFiles);
+                          }}
+                        >
+                          <Image
+                            source={require("../../assets/icons/cancel.png")}
+                            style={{ width: 16, height: 16, marginLeft: 7 }}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
                 </View>
               )}
             </View>
@@ -479,7 +661,7 @@ function ViewEditArticle({ navigation, route }) {
               mode="contained"
               style={{ marginTop: 20 }}
             >
-              Create Article
+              Update Article
             </Button>
           </KeyboardAvoidingView>
           <View
