@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { memo, useContext, useState } from "react";
 import {
   View,
   Text,
@@ -296,6 +296,7 @@ function CreateArticle({ navigation }) {
                 onChangeText={(text) => setTitle(text)}
                 label="Title"
                 mode="outlined"
+                value={title}
                 style={styles.textInput}
                 activeOutlineColor={COLORS.primary}
               />
@@ -375,6 +376,7 @@ function CreateArticle({ navigation }) {
                     textAlignVertical: "top",
                   },
                 ]}
+                value={content}
                 activeOutlineColor={COLORS.primary}
                 numberOfLines={20}
                 // style={styles.textInput}
@@ -481,7 +483,7 @@ function CreateArticle({ navigation }) {
   );
 }
 
-export default CreateArticle;
+export default memo(CreateArticle);
 
 const styles = StyleSheet.create({
   container: {

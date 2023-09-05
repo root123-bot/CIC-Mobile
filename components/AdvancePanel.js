@@ -16,6 +16,7 @@ import { TransparentPopUpIconMessage } from "./Messages";
 // import { CustomizedLottieMessage, TransparentPopUpIconMessage } from "./Ui";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LoadingSpinner } from "./Ui";
+import { ResearcherArticles } from "../utils/requests";
 
 function AdvancedPanel({
   title,
@@ -202,8 +203,21 @@ function AdvancedPanel({
       usermetadata.is_active
     ) {
       console.log("im the condition 3");
-      AppCtx.manipulateIsSettingInactive(false);
-      navigation.navigate("ResearcherProfile");
+      // i think we should fetch the artical if he should be redirected to the researcher.
+      // lets fetch some content
+      try {
+        const response = await ResearcherArticles(
+          AppCtx.usermetadata.get_user_id
+        );
+        AppCtx.updateUserRawPost(response);
+        AppCtx.manipulateIsSettingInactive(false);
+        navigation.navigate("ResearcherProfile");
+      } catch (err) {
+        console.log("THIS IS ERROR MESSAGE ", err.message);
+        setFormSubmitLoader(false);
+        setShowAnimation(false);
+        alert(err.message);
+      }
     }
 
     // 4
