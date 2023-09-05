@@ -50,8 +50,9 @@ function AppContextProvider({ children }) {
   }
 
   function manipulateUserRawPost(post) {
+    console.log("new raw post ", post);
     setUserRawPost((prevState) => {
-      return [...prevState, post];
+      return [post, ...prevState];
     });
   }
 

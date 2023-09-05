@@ -6,6 +6,7 @@ import { COLORS } from "../constants/colors";
 
 function DataTable({ data }) {
   const navigation = useNavigation();
+
   return (
     <View>
       <View style={styles.tableHeaderView}>
@@ -16,15 +17,23 @@ function DataTable({ data }) {
           {Platform.OS === "ios" && (
             <CustomLine color={COLORS.thirdary} style={styles.hr} />
           )}
-
+          {/* title */}
           {data
-            .map((val) => val.title)
+            .map((val) => ({ title: val.title, id: val.id }))
             .map((value, index) => (
               <View key={`${index * Math.random()}.FO`}>
-                <TouchableOpacity style={{ paddingVertical: 5 }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    console.log("Article id ", value.id);
+                    navigation.navigate("UpdateArticle", {
+                      articleId: value.id,
+                    });
+                  }}
+                  style={{ paddingVertical: 5 }}
+                >
                   <View style={[styles.columnHolder]}>
                     <Text numberOfLines={1} style={styles.colValue}>
-                      {value}
+                      {value.title}
                     </Text>
                   </View>
                 </TouchableOpacity>
@@ -33,7 +42,6 @@ function DataTable({ data }) {
                 )}
               </View>
             ))}
-          {/* my farm owner */}
         </View>
         <View style={[styles.innerContainer, { width: "37%" }]}>
           <View>
@@ -45,7 +53,7 @@ function DataTable({ data }) {
             <CustomLine color={COLORS.thirdary} style={styles.hr} />
           )}
 
-          {/* my location */}
+          {/* is published */}
           {data
             .map((val) => val.title)
             .map((value, index) => (
@@ -65,7 +73,6 @@ function DataTable({ data }) {
                 )}
               </View>
             ))}
-          {/* my location */}
         </View>
         <View style={[styles.innerContainer, { width: "26%" }]}>
           <View>
@@ -78,15 +85,26 @@ function DataTable({ data }) {
           )}
 
           {/* my date data */}
-
           {data
-            .map((val) => val.date_posted)
+            .map((val) => ({ date_posted: val.date_posted, id: val.id }))
             .map((value, index) => (
               <View key={`${index * Math.random()}.FO`}>
-                <TouchableOpacity style={{ paddingVertical: 5 }}>
+                <TouchableOpacity
+                  style={{ paddingVertical: 5 }}
+                  onPress={() => {
+                    console.log("Article id ", value.id);
+                    navigate.navigate("UpdateArticle", {
+                      articleId: value.id,
+                    });
+                  }}
+                >
                   <View style={[styles.columnHolder]}>
                     <Text numberOfLines={1} style={styles.colValue}>
-                      {`${value.split("T")[0]}`}
+                      {`${value.date_posted
+                        .split("T")[0]
+                        .split("-")
+                        .reverse()
+                        .join("-")}`}
                     </Text>
                   </View>
                 </TouchableOpacity>

@@ -139,11 +139,11 @@ function CreateArticle({ navigation }) {
       .then((result) => {
         console.log("result ", result);
         setIcon("check");
+        AppCtx.manipulateUserRawPost(result);
         setMessage("Success");
         setShowAnimation(false);
         setTimeout(() => {
           setFormSubmitLoader(false);
-          AppCtx.manipulateUserRawPost(result);
           navigation.navigate("ResearcherProfileScreen");
         }, 1000);
       })

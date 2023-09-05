@@ -51,6 +51,7 @@ import Dashboard from "./screens/OfficerTopTabs/Dashboard";
 import Researches from "./screens/OfficerTopTabs/Researches";
 import QuestionAnswers from "./screens/OfficerTopTabs/QuestionAnswers";
 import CreateArticle from "./screens/Researcher/CreateArticle";
+import ViewEditArticle from "./screens/Researcher/ViewEditArticle";
 
 const Stack = createNativeStackNavigator();
 const Stack1 = createStackNavigator();
@@ -177,6 +178,40 @@ function ResearcherStack({ navigation }) {
         }}
         name="CreateArticle"
         component={CreateArticle}
+      />
+      <Stack1.Screen
+        options={{
+          headerShown: true,
+          headerTitle: "Update Article",
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontFamily: "montserrat-17",
+            textTransform: "capitalize",
+          },
+          headerTitleAlign: "center",
+          headerStyle: {
+            backgroundColor: COLORS.primary,
+          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("ResearcherProfileScreen");
+              }}
+            >
+              <Text
+                style={{
+                  color: "#fff",
+                  marginLeft: 10,
+                  fontFamily: "montserrat-17",
+                }}
+              >
+                Cancel
+              </Text>
+            </TouchableOpacity>
+          ),
+        }}
+        name="UpdateArticle"
+        component={ViewEditArticle}
       />
     </Stack1.Navigator>
   );
@@ -415,7 +450,7 @@ function MyTabs() {
         name="Notifications"
         component={Notification}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         options={{
           title: "Post",
           tabBarIcon: () => (
@@ -432,7 +467,7 @@ function MyTabs() {
         }}
         name="Post"
         component={PostScreen}
-      />
+      /> */}
       <Tab.Screen
         options={{
           title: "Chats",

@@ -9,11 +9,13 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppContext } from "../../../../../store/context";
 import { COLORS } from "../../../../../constants/colors";
+
 const deviceHeight = Dimensions.get("window").height;
 
 function ResearcherDrawerContent(props) {
   console.log("Props ", props.profile);
   const AppCtx = useContext(AppContext);
+  const navigation = useNavigation();
 
   console.log("This is what i received ", props.usergroup);
   return (
@@ -32,7 +34,11 @@ function ResearcherDrawerContent(props) {
                 name="addfile"
                 titleStyle={{ marginLeft: 8, color: "#fff" }}
                 style={{ paddingVertical: 10 }}
-                onPress={() => {}}
+                onPress={() => {
+                  navigation.navigate("ResearcherDashboard", {
+                    screen: "CreateArticle",
+                  });
+                }}
               >
                 Add Article
               </PressableIconTextContainer>
