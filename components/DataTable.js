@@ -19,12 +19,26 @@ function DataTable({ data }) {
           )}
           {/* title */}
           {data
-            .map((val) => ({ title: val.title, id: val.id }))
+            .map((val) => ({
+              title: val.title,
+              id: val.id,
+              isDrafted: val.is_draft,
+              isPublished: val.get_is_published,
+            }))
             .map((value, index) => (
               <View key={`${index * Math.random()}.FO`}>
                 <TouchableOpacity
                   onPress={() => {
                     console.log("Article id ", value.id);
+                    // first check if the article is drafted or not...
+
+                    // if (value.isDrafted || value.isPublished) {
+                    //   // you can't update the article stared published/drafted by officer
+                    //   return alert(
+                    //     "You can't edit this article because it is already published or drafted by officer"
+                    //   );
+                    // }
+
                     navigation.navigate("UpdateArticle", {
                       articleId: value.id,
                     });

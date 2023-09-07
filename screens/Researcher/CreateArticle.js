@@ -20,6 +20,8 @@ import { CreateArticleHandler } from "../../utils/requests";
 import { AppContext } from "../../store/context";
 import { TransparentPopUpIconMessage } from "../../components/Messages";
 import { Picker } from "@react-native-picker/picker";
+import * as ImageCache from "react-native-expo-image-cache";
+import { MaterialIcons } from "@expo/vector-icons";
 
 function CreateArticle({ navigation }) {
   const AppCtx = useContext(AppContext);
@@ -45,7 +47,10 @@ function CreateArticle({ navigation }) {
       if (response.type === "success") {
         console.log("this is response extract from document picker", response);
         console.log("file ", response);
-        setMediaFiles((prevState) => [...prevState, response]);
+        setMediaFiles((prevState) => [
+          ...prevState,
+          { payload: response, index: prevState.length },
+        ]);
       }
     } catch (error) {
       console.log(error);
@@ -60,10 +65,19 @@ function CreateArticle({ navigation }) {
       if (!captured.canceled) {
         const serialized_captured = {
           ...captured.assets[0],
-          name: captured.assets[0].fileName,
+          name:
+            Platform.OS === "ios"
+              ? captured.assets[0].fileName
+              : captured.assets[0].uri.split("/")[
+                  captured.assets[0].uri.split("/").length - 1
+                ],
         };
+        console.log("This is file original ", captured);
         console.log("Here is what captured ", serialized_captured);
-        setMediaFiles((prevState) => [...prevState, serialized_captured]);
+        setMediaFiles((prevState) => [
+          ...prevState,
+          { payload: serialized_captured, index: prevState.length },
+        ]);
       }
     } catch (error) {
       console.log(error);
@@ -76,7 +90,10 @@ function CreateArticle({ navigation }) {
       copyToCacheDirectory: true,
     });
     audio.type !== "cancel" &&
-      setMediaFiles((prevState) => [...prevState, audio]);
+      setMediaFiles((prevState) => [
+        ...prevState,
+        { payload: audio, index: prevState.length },
+      ]);
   }
 
   //   pick only video
@@ -86,7 +103,10 @@ function CreateArticle({ navigation }) {
       copyToCacheDirectory: true,
     });
     video.type !== "cancel" &&
-      setMediaFiles((prevState) => [...prevState, video]);
+      setMediaFiles((prevState) => [
+        ...prevState,
+        { payload: video, index: prevState.length },
+      ]);
   }
 
   function submitDataHandler() {
@@ -104,28 +124,29 @@ function CreateArticle({ navigation }) {
     formData.append("user_id", AppCtx.usermetadata.get_user_id);
     let counter = 0;
     mediaFiles.forEach((file) => {
-      let uri_splited = file.uri.split(".");
+      let uri_splited = file.payload.uri.split(".");
       let file_type = uri_splited[uri_splited.length - 1];
-      let content = file.uri;
+      let content = file.payload.uri;
 
       if (Platform.OS === "ios") {
         const fieldname = counter === 0 ? "media" : `media${counter}`;
         formData.append(fieldname, {
           uri: content,
-          name: file.name,
+          name: file.payload.name,
           type: file_type,
         });
       } else if (Platform.OS === "android") {
-        let uri = file.uri;
+        const fieldname = counter === 0 ? "media" : `media${counter}`;
+        let uri = file.payload.uri;
         if (uri[0] === "/") {
           uri = `file://${uri}`;
           uri = uri.replace(/%/g, "%25");
         }
-        let filetype = file.name.split(".");
+        let filetype = file.payload.name.split(".");
         filetype = filetype[filetype.length - 1];
         formData.append(fieldname, {
           uri: uri,
-          name: file.name,
+          name: file.payload.name,
           type: `application/${filetype}`,
         });
       }
@@ -210,7 +231,7 @@ function CreateArticle({ navigation }) {
                       }}
                       numberOfLines={1}
                     >
-                      Embed file
+                      {`Embedded file (${mediaFiles.length})`}
                     </Text>
                     <HelperText
                       style={{
@@ -344,7 +365,7 @@ function CreateArticle({ navigation }) {
                     <Text style={{ marginLeft: "3%" }}>Category</Text>
                     <View
                       style={{
-                        borderColor: "white",
+                        borderColor: "grey",
                         borderRadius: 5,
                         borderWidth: 1,
                       }}
@@ -364,23 +385,43 @@ function CreateArticle({ navigation }) {
                   </View>
                 </>
               )}
-              <TextInput
-                label="Content"
-                mode="outlined"
-                multiline={true}
-                onChangeText={(text) => setContent(text)}
-                style={[
-                  styles.textInput,
-                  {
-                    paddingVertical: 15,
-                    textAlignVertical: "top",
-                  },
-                ]}
-                value={content}
-                activeOutlineColor={COLORS.primary}
-                numberOfLines={20}
-                // style={styles.textInput}
-              />
+              {Platform.OS === "ios" ? (
+                <TextInput
+                  label="Content"
+                  mode="outlined"
+                  multiline={true}
+                  onChangeText={(text) => setContent(text)}
+                  style={[
+                    styles.textInput,
+                    {
+                      paddingVertical: 15,
+                      textAlignVertical: "top",
+                    },
+                  ]}
+                  value={content}
+                  activeOutlineColor={COLORS.primary}
+                  numberOfLines={20}
+                  // style={styles.textInput}
+                />
+              ) : (
+                <TextInput
+                  label="Content"
+                  mode="outlined"
+                  multiline={true}
+                  onChangeText={(text) => setContent(text)}
+                  style={[
+                    styles.textInput,
+                    {
+                      paddingVertical: 15,
+                      textAlignVertical: "top",
+                    },
+                  ]}
+                  value={content}
+                  activeOutlineColor={COLORS.primary}
+                  numberOfLines={20}
+                  // style={styles.textInput}
+                />
+              )}
               {/* box to display uploaded files */}
               {mediaFiles.length > 0 && (
                 <View
@@ -400,81 +441,202 @@ function CreateArticle({ navigation }) {
                   >
                     Attached files
                   </Text>
-                  {/* list of files */}
-                  {mediaFiles.map((file, index) => (
-                    <View
-                      key={index}
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        marginVertical: 5,
-                      }}
+                  <View
+                    style={{
+                      width: "100%",
+                      marginVertical: 15,
+                    }}
+                  >
+                    <ScrollView
+                      horizontal={true}
+                      showsHorizontalScrollIndicator={false}
+                      //   style={{
+                      //     flexDirection: "row",
+                      //     marginTop: 10,
+                      //   }}
                     >
-                      <Image
-                        source={
-                          file.name.split(".")[
-                            file.name.split(".").length - 1
-                          ] === "pdf"
-                            ? require("../../assets/images/doc.png")
-                            : file.name.split(".")[
-                                file.name.split(".").length - 1
-                              ] === "mp3"
-                            ? require("../../assets/images/music-file-2.png")
-                            : file.name.split(".")[
-                                file.name.split(".").length - 1
-                              ] === "mp4"
-                            ? require("../../assets/images/video-camera-2.png")
-                            : require("../../assets/images/photo.png")
-                        }
-                        style={{ width: 16, height: 16 }}
-                      />
-                      <Text
+                      <View
                         style={{
-                          marginLeft: 5,
-                          fontSize: 16,
-                          fontFamily: "overpass-reg",
+                          flexDirection: "row",
+                          justifyContent: "space-between",
                         }}
                       >
-                        {`${file.name.split(".")[0].substr(0, 10) + "..."} ${
-                          file.name.split(".")[file.name.split(".").length - 1]
-                        }`}
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setMediaFiles((prevState) => {
-                            console.log(
-                              "index ",
-                              index,
-                              " length ",
-                              prevState.length
+                        {mediaFiles
+                          .filter((val) => {
+                            console.log("This is our value ", val);
+                            return (
+                              val.payload.name.split(".")[
+                                val.payload.name.split(".").length - 1
+                              ] === "png" ||
+                              val.payload.name.split(".")[
+                                val.payload.name.split(".").length - 1
+                              ] === "jpg" ||
+                              val.payload.name.split(".")[
+                                val.payload.name.split(".").length - 1
+                              ] === "png" ||
+                              val.payload.name.split(".")[
+                                val.payload.name.split(".").length - 1
+                              ] === "jpeg"
                             );
-                            prevState.splice(index, 1);
-                            return [...prevState];
-                          });
-                          console.log("media files ", mediaFiles);
+                          })
+                          .map((media, index) => (
+                            <View
+                              style={{
+                                width: 120,
+                                height: 90,
+                                margin: 10,
+                              }}
+                            >
+                              <Image
+                                source={{ uri: media.payload.uri }}
+                                style={{
+                                  width: "100%",
+                                  borderRadius: 15,
+                                  height: "100%",
+                                }}
+                              />
+
+                              <View
+                                style={{
+                                  width: 30,
+                                  height: 30,
+                                  position: "absolute",
+                                  top: 0,
+                                  right: 0,
+                                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                                }}
+                              ></View>
+                              <TouchableOpacity
+                                style={{
+                                  position: "absolute",
+                                  top: 3,
+                                  right: 3,
+                                }}
+                                onPress={() => {
+                                  setMediaFiles((prevState) => {
+                                    console.log(
+                                      "index ",
+                                      index,
+                                      " length ",
+                                      prevState.length
+                                    );
+                                    prevState.splice(media.index, 1);
+                                    return [...prevState];
+                                  });
+                                  console.log("media files ", mediaFiles);
+                                }}
+                              >
+                                <MaterialIcons
+                                  name="delete"
+                                  color={COLORS.danger}
+                                  size={24}
+                                />
+                              </TouchableOpacity>
+                            </View>
+                          ))}
+                      </View>
+                    </ScrollView>
+                  </View>
+                  {/* other files */}
+                  {mediaFiles
+                    .filter((val) => {
+                      return (
+                        val.payload.name.split(".")[
+                          val.payload.name.split(".").length - 1
+                        ] !== "png" &&
+                        val.payload.name.split(".")[
+                          val.payload.name.split(".").length - 1
+                        ] !== "jpg" &&
+                        val.payload.name.split(".")[
+                          val.payload.name.split(".").length - 1
+                        ] !== "png" &&
+                        val.payload.name.split(".")[
+                          val.payload.name.split(".").length - 1
+                        ] !== "jpeg"
+                      );
+                    })
+                    .map((file, index) => (
+                      <View
+                        key={index}
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          marginVertical: 5,
                         }}
                       >
                         <Image
-                          source={require("../../assets/icons/cancel.png")}
-                          style={{ width: 16, height: 16, marginLeft: 7 }}
+                          source={
+                            file.payload.name.split(".")[
+                              file.payload.name.split(".").length - 1
+                            ] === "pdf"
+                              ? require("../../assets/images/doc.png")
+                              : file.payload.name.split(".")[
+                                  file.payload.name.split(".").length - 1
+                                ] === "mp3"
+                              ? require("../../assets/images/music-file-2.png")
+                              : file.payload.name.split(".")[
+                                  file.payload.name.split(".").length - 1
+                                ] === "mp4"
+                              ? require("../../assets/images/video-camera-2.png")
+                              : require("../../assets/images/photo.png")
+                          }
+                          style={{ width: 16, height: 16 }}
                         />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
+                        <Text
+                          style={{
+                            marginLeft: 5,
+                            fontSize: 16,
+                            fontFamily: "overpass-reg",
+                          }}
+                        >
+                          {`${
+                            file.payload.name.split(".")[0].substr(0, 10) +
+                            "..."
+                          } ${
+                            file.payload.name.split(".")[
+                              file.payload.name.split(".").length - 1
+                            ]
+                          }`}
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setMediaFiles((prevState) => {
+                              console.log(
+                                "index ",
+                                index,
+                                " length ",
+                                prevState.length
+                              );
+                              prevState.splice(file.index, 1);
+                              return [...prevState];
+                            });
+                            console.log("media files ", mediaFiles);
+                          }}
+                        >
+                          <Image
+                            source={require("../../assets/icons/cancel.png")}
+                            style={{ width: 16, height: 16, marginLeft: 7 }}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
                 </View>
               )}
             </View>
             <Button
               onPress={submitDataHandler}
               mode="contained"
-              style={{ marginTop: 20 }}
+              style={{ marginTop: 20, backgroundColor: COLORS.primary }}
+              labelStyle={{
+                fontFamily: "montserrat-17",
+              }}
             >
               Create Article
             </Button>
           </KeyboardAvoidingView>
           <View
             style={{
-              height: 150,
+              height: 500,
             }}
           ></View>
         </ScrollView>

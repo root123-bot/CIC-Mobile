@@ -21,7 +21,7 @@ import { AppContext } from "../../store/context";
 import { TransparentPopUpIconMessage } from "../../components/Messages";
 import { Picker } from "@react-native-picker/picker";
 import { BASE_URL } from "../../constants/domain";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as ImageCache from "react-native-expo-image-cache";
 
 function ViewEditArticle({ navigation, route }) {
@@ -48,7 +48,13 @@ function ViewEditArticle({ navigation, route }) {
   const [toggleCategory, setToggleCategory] = useState("none");
   const [categoryIcons, setCategoryIcons] = useState("chevron-down");
 
+  const isDisabled =
+    targettedArticle.is_draft || targettedArticle.get_is_published;
+
   async function selectFile() {
+    if (isDisabled) {
+      return;
+    }
     try {
       const response = await DocumentPicker.getDocumentAsync({
         type: "application/pdf",
@@ -66,6 +72,9 @@ function ViewEditArticle({ navigation, route }) {
   }
 
   async function loadImageHandler() {
+    if (isDisabled) {
+      return;
+    }
     try {
       const captured = await launchImageLibraryAsync({
         quality: 0.2,
@@ -73,7 +82,12 @@ function ViewEditArticle({ navigation, route }) {
       if (!captured.canceled) {
         const serialized_captured = {
           ...captured.assets[0],
-          name: captured.assets[0].fileName,
+          name:
+            Platform.OS === "ios"
+              ? captured.assets[0].fileName
+              : captured.assets[0].uri.split("/")[
+                  captured.assets[0].uri.split("/").length - 1
+                ],
         };
         console.log("Here is what captured ", serialized_captured);
         setMediaFiles((prevState) => [...prevState, serialized_captured]);
@@ -84,6 +98,9 @@ function ViewEditArticle({ navigation, route }) {
   }
 
   async function importAudio() {
+    if (isDisabled) {
+      return;
+    }
     const audio = await DocumentPicker.getDocumentAsync({
       type: "audio/mp3",
       copyToCacheDirectory: true,
@@ -94,6 +111,9 @@ function ViewEditArticle({ navigation, route }) {
 
   //   pick only video
   async function importVideo() {
+    if (isDisabled) {
+      return;
+    }
     const video = await DocumentPicker.getDocumentAsync({
       type: "video/mp4",
       copyToCacheDirectory: true,
@@ -305,11 +325,35 @@ function ViewEditArticle({ navigation, route }) {
                 </View>
                 <CustomLine color={"grey"} />
               </View>
+              {isDisabled && (
+                <View
+                  style={{
+                    marginVertical: 5,
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    // alignItems: "fle",
+                  }}
+                >
+                  <MaterialIcons name="error" size={17} color={COLORS.danger} />
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      color: COLORS.danger,
+                      fontFamily: "overpass-reg",
+                      fontSize: 17,
+                      marginLeft: 3,
+                    }}
+                  >
+                    The articles is locked by Officer
+                  </Text>
+                </View>
+              )}
               <TextInput
                 onChangeText={(text) => setTitle(text)}
                 label="Title"
                 value={title}
                 mode="outlined"
+                disabled={isDisabled}
                 style={styles.textInput}
                 activeOutlineColor={COLORS.primary}
               />
@@ -317,6 +361,9 @@ function ViewEditArticle({ navigation, route }) {
                 <>
                   <Pressable
                     onPress={() => {
+                      if (isDisabled) {
+                        return;
+                      }
                       if (toggleCategory === "none") {
                         setToggleCategory("flex");
                         setCategoryIcons("chevron-up");
@@ -330,6 +377,7 @@ function ViewEditArticle({ navigation, route }) {
                     <View pointerEvents="none">
                       <TextInput
                         label="Category"
+                        disabled={isDisabled}
                         editable={false}
                         mode="outlined"
                         value={category}
@@ -357,7 +405,7 @@ function ViewEditArticle({ navigation, route }) {
                     <Text style={{ marginLeft: "3%" }}>Category</Text>
                     <View
                       style={{
-                        borderColor: "white",
+                        borderColor: "grey",
                         borderRadius: 5,
                         borderWidth: 1,
                       }}
@@ -380,7 +428,7 @@ function ViewEditArticle({ navigation, route }) {
               <TextInput
                 label="Content"
                 mode="outlined"
-                multiline={true}
+                multiline
                 onChangeText={(text) => setContent(text)}
                 style={[
                   styles.textInput,
@@ -392,6 +440,7 @@ function ViewEditArticle({ navigation, route }) {
                 value={content}
                 activeOutlineColor={COLORS.primary}
                 numberOfLines={20}
+                disabled={isDisabled}
                 // style={styles.textInput}
               />
               {/* box to display uploaded files */}
@@ -470,6 +519,7 @@ function ViewEditArticle({ navigation, route }) {
                           })
                           .map((media, index) => (
                             <View
+                              key={index}
                               style={{
                                 width: 120,
                                 height: 90,
@@ -499,30 +549,33 @@ function ViewEditArticle({ navigation, route }) {
                                   }}
                                 />
                               )}
-
-                              <View
-                                style={{
-                                  width: 30,
-                                  height: 30,
-                                  position: "absolute",
-                                  top: 0,
-                                  right: 0,
-                                  backgroundColor: "rgba(0, 0, 0, 0.5)",
-                                }}
-                              ></View>
-                              <TouchableOpacity
-                                style={{
-                                  position: "absolute",
-                                  top: 3,
-                                  right: 3,
-                                }}
-                              >
-                                <MaterialIcons
-                                  name="delete"
-                                  color={COLORS.danger}
-                                  size={24}
-                                />
-                              </TouchableOpacity>
+                              {!isDisabled && (
+                                <>
+                                  <View
+                                    style={{
+                                      width: 30,
+                                      height: 30,
+                                      position: "absolute",
+                                      top: 0,
+                                      right: 0,
+                                      backgroundColor: "rgba(0, 0, 0, 0.5)",
+                                    }}
+                                  ></View>
+                                  <TouchableOpacity
+                                    style={{
+                                      position: "absolute",
+                                      top: 3,
+                                      right: 3,
+                                    }}
+                                  >
+                                    <MaterialIcons
+                                      name="delete"
+                                      color={COLORS.danger}
+                                      size={24}
+                                    />
+                                  </TouchableOpacity>
+                                </>
+                              )}
                             </View>
                           ))}
                       </View>
@@ -631,38 +684,67 @@ function ViewEditArticle({ navigation, route }) {
                                 ]
                               }`}
                         </Text>
-                        <TouchableOpacity
-                          onPress={() => {
-                            setMediaFiles((prevState) => {
-                              console.log(
-                                "index ",
-                                index,
-                                " length ",
-                                prevState.length
-                              );
-                              prevState.splice(index, 1);
-                              return [...prevState];
-                            });
-                            console.log("media files ", mediaFiles);
-                          }}
-                        >
-                          <Image
-                            source={require("../../assets/icons/cancel.png")}
-                            style={{ width: 16, height: 16, marginLeft: 7 }}
-                          />
-                        </TouchableOpacity>
+                        {!isDisabled && (
+                          <TouchableOpacity
+                            onPress={() => {
+                              setMediaFiles((prevState) => {
+                                console.log(
+                                  "index ",
+                                  index,
+                                  " length ",
+                                  prevState.length
+                                );
+                                prevState.splice(index, 1);
+                                return [...prevState];
+                              });
+                              console.log("media files ", mediaFiles);
+                            }}
+                          >
+                            <Image
+                              source={require("../../assets/icons/cancel.png")}
+                              style={{ width: 16, height: 16, marginLeft: 7 }}
+                            />
+                          </TouchableOpacity>
+                        )}
                       </View>
                     ))}
                 </View>
               )}
             </View>
-            <Button
-              onPress={submitDataHandler}
-              mode="contained"
-              style={{ marginTop: 20 }}
-            >
-              Update Article
-            </Button>
+            {isDisabled ? (
+              <View
+                style={{
+                  marginVertical: 20,
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  // alignItems: "fle",
+                }}
+              >
+                <MaterialIcons name="error" size={17} color={COLORS.danger} />
+                <Text
+                  style={{
+                    textAlign: "center",
+                    color: COLORS.danger,
+                    fontFamily: "overpass-reg",
+                    fontSize: 17,
+                    marginLeft: 3,
+                  }}
+                >
+                  The articles is locked by Officer
+                </Text>
+              </View>
+            ) : (
+              <Button
+                onPress={submitDataHandler}
+                mode="contained"
+                style={{ marginTop: 20, backgroundColor: COLORS.primary }}
+                labelStyle={{
+                  fontFamily: "montserrat-17",
+                }}
+              >
+                Update Article
+              </Button>
+            )}
           </KeyboardAvoidingView>
           <View
             style={{
