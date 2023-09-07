@@ -16,7 +16,7 @@ import { CustomLine } from "../../components/Ui";
 import * as DocumentPicker from "expo-document-picker";
 import { launchImageLibraryAsync, PermissionStatus } from "expo-image-picker";
 import { COLORS } from "../../constants/colors";
-import { CreateArticleHandler } from "../../utils/requests";
+import { CreateArticleHandler, UpdateArticle } from "../../utils/requests";
 import { AppContext } from "../../store/context";
 import { TransparentPopUpIconMessage } from "../../components/Messages";
 import { Picker } from "@react-native-picker/picker";
@@ -35,7 +35,7 @@ function ViewEditArticle({ navigation, route }) {
   console.log("target ", targettedArticle);
   const [mediaFiles, setMediaFiles] = useState(
     targettedArticle.posted_media.map((val, index) => ({
-      payload: { uri: val, source: "server" },
+      payload: { uri: val.path, source: "server", id: val.id },
       index,
     }))
   );
@@ -50,6 +50,7 @@ function ViewEditArticle({ navigation, route }) {
   const [icon, setIcon] = useState("");
   const [toggleCategory, setToggleCategory] = useState("none");
   const [categoryIcons, setCategoryIcons] = useState("chevron-down");
+  const [trimmedServerMedia, setTrimmedServerMedia] = useState([]);
 
   const isDisabled =
     targettedArticle.is_draft || targettedArticle.get_is_published;
@@ -145,16 +146,23 @@ function ViewEditArticle({ navigation, route }) {
     // otherwiser we're good to go..
     setShowAnimation(true);
     setFormSubmitLoader(true);
+    console.log("Target ID ", targettedArticle.id);
     const formData = new FormData();
     formData.append("title", title);
     formData.append("category", category);
     formData.append("content", content);
-    formData.append("user_id", AppCtx.usermetadata.get_user_id);
+    formData.append("post_id", articleId);
+    formData.append("trimmed_media", JSON.stringify(trimmedServerMedia));
+
     let counter = 0;
+    console.log("Step 1");
     mediaFiles.forEach((file) => {
+      if (file.payload.source === "server") {
+        return;
+      }
       let uri_splited = file.payload.uri.split(".");
       let file_type = uri_splited[uri_splited.length - 1];
-      let content = file.uri;
+      let content = file.payload.uri;
 
       if (Platform.OS === "ios") {
         const fieldname = counter === 0 ? "media" : `media${counter}`;
@@ -164,6 +172,7 @@ function ViewEditArticle({ navigation, route }) {
           type: file_type,
         });
       } else if (Platform.OS === "android") {
+        const fieldname = counter === 0 ? "media" : `media${counter}`;
         let uri = file.payload.uri;
         if (uri[0] === "/") {
           uri = `file://${uri}`;
@@ -180,8 +189,10 @@ function ViewEditArticle({ navigation, route }) {
       counter++;
       // post multiple files https://stackoverflow.com/questions/12989442/uploading-multiple-files-using-formdata#:~:text=If%20you%20call%20data.,it%20does%20not%20already%20exist.
     });
+    console.log("Step 2");
     formData.append("total_media", `media${counter}`);
-    CreateArticleHandler(formData, {
+    console.log("Step 3");
+    UpdateArticle(formData, {
       "Content-Type": "multipart/form-data",
     })
       .then((result) => {
@@ -593,7 +604,13 @@ function ViewEditArticle({ navigation, route }) {
                                         prevState.splice(media.index, 1);
                                         return [...prevState];
                                       });
-                                      console.log("media files ", mediaFiles);
+                                      // also check if removed media is from the server, if so add it to the trimmed server media
+                                      if (media.payload.source === "server") {
+                                        setTrimmedServerMedia((prevState) => [
+                                          ...prevState,
+                                          media.payload.id,
+                                        ]);
+                                      }
                                     }}
                                   >
                                     <MaterialIcons
@@ -725,6 +742,7 @@ function ViewEditArticle({ navigation, route }) {
                         {!isDisabled && (
                           <TouchableOpacity
                             onPress={() => {
+                              console.log("This is trimmed file ", file);
                               setMediaFiles((prevState) => {
                                 console.log(
                                   "index ",
@@ -732,10 +750,16 @@ function ViewEditArticle({ navigation, route }) {
                                   " length ",
                                   prevState.length
                                 );
-                                prevState.splice(index, 1);
+                                prevState.splice(file.index, 1);
                                 return [...prevState];
                               });
-                              console.log("media files ", mediaFiles);
+                              // also check if removed media is from the server, if so add it to the trimmed server media
+                              if (file.payload.source === "server") {
+                                setTrimmedServerMedia((prevState) => [
+                                  ...prevState,
+                                  file.payload.id,
+                                ]);
+                              }
                             }}
                           >
                             <Image

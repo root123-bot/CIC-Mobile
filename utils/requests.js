@@ -209,6 +209,28 @@ export const CreateArticleHandler = async (fdata, headers) => {
     .catch((error) => Promise.reject(error));
 };
 
+export const UpdateArticle = async (fdata, headers) => {
+  console.log("someone call me ");
+  return fetch(`${BASE_URL}/api/updatearticle/`, {
+    method: "POST",
+    body: fdata,
+    headers: headers,
+  })
+    .then((response) => {
+      if (response.status === 200) {
+        return response.json();
+      } else if (response.status === 406) {
+        throw new Error(`We don't accept this usergroup`);
+      } else {
+        response.json().then((output) => {
+          throw new Error(output.details);
+        });
+      }
+    })
+    .then((data) => Promise.resolve(data))
+    .catch((error) => Promise.reject(error));
+};
+
 export const ResearcherArticles = async (user_id) => {
   return fetch(`${BASE_URL}/api/rarticles/`, {
     method: "POST",

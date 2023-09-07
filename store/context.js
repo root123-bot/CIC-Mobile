@@ -78,8 +78,16 @@ function AppContextProvider({ children }) {
   }
 
   function manipulateUserRawPost(post) {
-    console.log("new raw post ", post);
     setUserRawPost((prevState) => {
+      const existingOne = prevState.find((item) => item.id === post.id);
+
+      // replace the existing one with this new one
+      if (existingOne) {
+        const index = prevState.indexOf(existingOne);
+        prevState[index] = post;
+        return prevState;
+      }
+      // else just add it to the list
       return [post, ...prevState];
     });
   }
