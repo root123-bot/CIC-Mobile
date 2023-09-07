@@ -22,6 +22,7 @@ function ResearcherProfile({ navigation }) {
   const [search, setSearch] = useState("");
   const [data, setData] = useState(AppCtx.userrawpost);
 
+  // AppCtx.userrawpost how to detect its changed.. how
   useEffect(() => {
     setData(AppCtx.userrawpost);
   }, [AppCtx.userrawpost.length]);
