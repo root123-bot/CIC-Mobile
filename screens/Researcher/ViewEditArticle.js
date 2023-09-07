@@ -34,7 +34,10 @@ function ViewEditArticle({ navigation, route }) {
 
   console.log("target ", targettedArticle);
   const [mediaFiles, setMediaFiles] = useState(
-    targettedArticle.posted_media.map((val) => ({ uri: val, source: "server" }))
+    targettedArticle.posted_media.map((val, index) => ({
+      payload: { uri: val, source: "server" },
+      index,
+    }))
   );
   const [title, setTitle] = useState(targettedArticle.title);
   const [category, setCategory] = useState(
@@ -64,7 +67,10 @@ function ViewEditArticle({ navigation, route }) {
       if (response.type === "success") {
         console.log("this is response extract from document picker", response);
         console.log("file ", response);
-        setMediaFiles((prevState) => [...prevState, response]);
+        setMediaFiles((prevState) => [
+          ...prevState,
+          { payload: response, index: prevState.length },
+        ]);
       }
     } catch (error) {
       console.log(error);
@@ -90,7 +96,10 @@ function ViewEditArticle({ navigation, route }) {
                 ],
         };
         console.log("Here is what captured ", serialized_captured);
-        setMediaFiles((prevState) => [...prevState, serialized_captured]);
+        setMediaFiles((prevState) => [
+          ...prevState,
+          { payload: serialized_captured, index: prevState.length },
+        ]);
       }
     } catch (error) {
       console.log(error);
@@ -106,7 +115,10 @@ function ViewEditArticle({ navigation, route }) {
       copyToCacheDirectory: true,
     });
     audio.type !== "cancel" &&
-      setMediaFiles((prevState) => [...prevState, audio]);
+      setMediaFiles((prevState) => [
+        ...prevState,
+        { payload: audio, index: prevState.length },
+      ]);
   }
 
   //   pick only video
@@ -119,7 +131,10 @@ function ViewEditArticle({ navigation, route }) {
       copyToCacheDirectory: true,
     });
     video.type !== "cancel" &&
-      setMediaFiles((prevState) => [...prevState, video]);
+      setMediaFiles((prevState) => [
+        ...prevState,
+        { payload: video, index: prevState.length },
+      ]);
   }
 
   function submitDataHandler() {
@@ -137,7 +152,7 @@ function ViewEditArticle({ navigation, route }) {
     formData.append("user_id", AppCtx.usermetadata.get_user_id);
     let counter = 0;
     mediaFiles.forEach((file) => {
-      let uri_splited = file.uri.split(".");
+      let uri_splited = file.payload.uri.split(".");
       let file_type = uri_splited[uri_splited.length - 1];
       let content = file.uri;
 
@@ -145,20 +160,20 @@ function ViewEditArticle({ navigation, route }) {
         const fieldname = counter === 0 ? "media" : `media${counter}`;
         formData.append(fieldname, {
           uri: content,
-          name: file.name,
+          name: file.payload.name,
           type: file_type,
         });
       } else if (Platform.OS === "android") {
-        let uri = file.uri;
+        let uri = file.payload.uri;
         if (uri[0] === "/") {
           uri = `file://${uri}`;
           uri = uri.replace(/%/g, "%25");
         }
-        let filetype = file.name.split(".");
+        let filetype = file.payload.name.split(".");
         filetype = filetype[filetype.length - 1];
         formData.append(fieldname, {
           uri: uri,
-          name: file.name,
+          name: file.payload.name,
           type: `application/${filetype}`,
         });
       }
@@ -485,34 +500,34 @@ function ViewEditArticle({ navigation, route }) {
                       >
                         {mediaFiles
                           .filter((val) => {
-                            if (val.source === "server") {
+                            if (val.payload.source === "server") {
                               return (
-                                val.uri.split(".")[
-                                  val.uri.split(".").length - 1
+                                val.payload.uri.split(".")[
+                                  val.payload.uri.split(".").length - 1
                                 ] === "png" ||
-                                val.uri.split(".")[
-                                  val.uri.split(".").length - 1
+                                val.payload.uri.split(".")[
+                                  val.payload.uri.split(".").length - 1
                                 ] === "jpg" ||
-                                val.uri.split(".")[
-                                  val.uri.split(".").length - 1
+                                val.payload.uri.split(".")[
+                                  val.payload.uri.split(".").length - 1
                                 ] === "png" ||
-                                val.uri.split(".")[
-                                  val.uri.split(".").length - 1
+                                val.payload.uri.split(".")[
+                                  val.payload.uri.split(".").length - 1
                                 ] === "jpeg"
                               );
                             } else {
                               return (
-                                val.name.split(".")[
-                                  val.name.split(".").length - 1
+                                val.payload.name.split(".")[
+                                  val.payload.name.split(".").length - 1
                                 ] === "png" ||
-                                val.name.split(".")[
-                                  val.name.split(".").length - 1
+                                val.payload.name.split(".")[
+                                  val.payload.name.split(".").length - 1
                                 ] === "jpg" ||
-                                val.name.split(".")[
-                                  val.name.split(".").length - 1
+                                val.payload.name.split(".")[
+                                  val.payload.name.split(".").length - 1
                                 ] === "png" ||
-                                val.name.split(".")[
-                                  val.name.split(".").length - 1
+                                val.payload.name.split(".")[
+                                  val.payload.name.split(".").length - 1
                                 ] === "jpeg"
                               );
                             }
@@ -526,11 +541,11 @@ function ViewEditArticle({ navigation, route }) {
                                 margin: 10,
                               }}
                             >
-                              {media.source === "server" ? (
+                              {media.payload.source === "server" ? (
                                 <ImageCache.Image
                                   {...{
-                                    preview: `${BASE_URL}${media.uri}`,
-                                    uri: `${BASE_URL}${media.uri}`,
+                                    preview: `${BASE_URL}${media.payload.uri}`,
+                                    uri: `${BASE_URL}${media.payload.uri}`,
                                     tint: "dark",
                                     style: {
                                       width: "100%",
@@ -541,7 +556,7 @@ function ViewEditArticle({ navigation, route }) {
                                 />
                               ) : (
                                 <Image
-                                  source={{ uri: media.uri }}
+                                  source={{ uri: media.payload.uri }}
                                   style={{
                                     width: "100%",
                                     borderRadius: 15,
@@ -567,6 +582,19 @@ function ViewEditArticle({ navigation, route }) {
                                       top: 3,
                                       right: 3,
                                     }}
+                                    onPress={() => {
+                                      setMediaFiles((prevState) => {
+                                        console.log(
+                                          "index ",
+                                          index,
+                                          " length ",
+                                          prevState.length
+                                        );
+                                        prevState.splice(media.index, 1);
+                                        return [...prevState];
+                                      });
+                                      console.log("media files ", mediaFiles);
+                                    }}
                                   >
                                     <MaterialIcons
                                       name="delete"
@@ -584,30 +612,34 @@ function ViewEditArticle({ navigation, route }) {
                   {/* other files */}
                   {mediaFiles
                     .filter((val) => {
-                      if (val.source === "server") {
+                      if (val.payload.source === "server") {
                         return (
-                          val.uri.split(".")[val.uri.split(".").length - 1] !==
-                            "png" &&
-                          val.uri.split(".")[val.uri.split(".").length - 1] !==
-                            "jpg" &&
-                          val.uri.split(".")[val.uri.split(".").length - 1] !==
-                            "png" &&
-                          val.uri.split(".")[val.uri.split(".").length - 1] !==
-                            "jpeg"
+                          val.payload.uri.split(".")[
+                            val.payload.uri.split(".").length - 1
+                          ] !== "png" &&
+                          val.payload.uri.split(".")[
+                            val.payload.uri.split(".").length - 1
+                          ] !== "jpg" &&
+                          val.payload.uri.split(".")[
+                            val.payload.uri.split(".").length - 1
+                          ] !== "png" &&
+                          val.payload.uri.split(".")[
+                            val.payload.uri.split(".").length - 1
+                          ] !== "jpeg"
                         );
                       } else {
                         return (
-                          val.name.split(".")[
-                            val.name.split(".").length - 1
+                          val.payload.name.split(".")[
+                            val.payload.name.split(".").length - 1
                           ] !== "png" &&
-                          val.name.split(".")[
-                            val.name.split(".").length - 1
+                          val.payload.name.split(".")[
+                            val.payload.name.split(".").length - 1
                           ] !== "jpg" &&
-                          val.name.split(".")[
-                            val.name.split(".").length - 1
+                          val.payload.name.split(".")[
+                            val.payload.name.split(".").length - 1
                           ] !== "png" &&
-                          val.name.split(".")[
-                            val.name.split(".").length - 1
+                          val.payload.name.split(".")[
+                            val.payload.name.split(".").length - 1
                           ] !== "jpeg"
                         );
                       }
@@ -623,30 +655,30 @@ function ViewEditArticle({ navigation, route }) {
                       >
                         <Image
                           source={
-                            file.source === "server"
-                              ? file.uri.split(".")[
-                                  file.uri.split(".").length - 1
+                            file.payload.source === "server"
+                              ? file.payload.uri.split(".")[
+                                  file.payload.uri.split(".").length - 1
                                 ] === "pdf"
                                 ? require("../../assets/images/doc.png")
-                                : file.uri.split(".")[
-                                    file.uri.split(".").length - 1
+                                : file.payload.uri.split(".")[
+                                    file.payload.uri.split(".").length - 1
                                   ] === "mp3"
                                 ? require("../../assets/images/music-file-2.png")
-                                : file.uri.split(".")[
-                                    file.uri.split(".").length - 1
+                                : file.payload.uri.split(".")[
+                                    file.payload.uri.split(".").length - 1
                                   ] === "mp4"
                                 ? require("../../assets/images/video-camera-2.png")
                                 : require("../../assets/images/photo.png")
-                              : file.name.split(".")[
-                                  file.name.split(".").length - 1
+                              : file.payload.name.split(".")[
+                                  file.payload.name.split(".").length - 1
                                 ] === "pdf"
                               ? require("../../assets/images/doc.png")
-                              : file.name.split(".")[
-                                  file.name.split(".").length - 1
+                              : file.payload.name.split(".")[
+                                  file.payload.name.split(".").length - 1
                                 ] === "mp3"
                               ? require("../../assets/images/music-file-2.png")
-                              : file.name.split(".")[
-                                  file.name.split(".").length - 1
+                              : file.payload.name.split(".")[
+                                  file.payload.name.split(".").length - 1
                                 ] === "mp4"
                               ? require("../../assets/images/video-camera-2.png")
                               : require("../../assets/images/photo.png")
@@ -660,27 +692,33 @@ function ViewEditArticle({ navigation, route }) {
                             fontFamily: "overpass-reg",
                           }}
                         >
-                          {file.source === "server"
+                          {file.payload.source === "server"
                             ? `${
-                                file.uri
+                                file.payload.uri
                                   .split("/")
-                                  [file.uri.split("/").length - 1].split(".")[0]
+                                  [
+                                    file.payload.uri.split("/").length - 1
+                                  ].split(".")[0]
                                   .substr(0, 10) + "..."
                               } ${
-                                file.uri
+                                file.payload.uri
                                   .split("/")
-                                  [file.uri.split("/").length - 1].split(".")[
-                                  file.uri
+                                  [
+                                    file.payload.uri.split("/").length - 1
+                                  ].split(".")[
+                                  file.payload.uri
                                     .split("/")
-                                    [file.uri.split("/").length - 1].split(".")
-                                    .length - 1
+                                    [
+                                      file.payload.uri.split("/").length - 1
+                                    ].split(".").length - 1
                                 ]
                               }`
                             : `${
-                                file.name.split(".")[0].substr(0, 10) + "..."
+                                file.payload.name.split(".")[0].substr(0, 10) +
+                                "..."
                               } ${
-                                file.name.split(".")[
-                                  file.name.split(".").length - 1
+                                file.payload.name.split(".")[
+                                  file.payload.name.split(".").length - 1
                                 ]
                               }`}
                         </Text>
