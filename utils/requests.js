@@ -15,6 +15,9 @@ export const getOTP = async (phone_number) => {
     },
   })
     .then((response) => {
+      // I think the error from "Temporary failure in name resolution" is resolved by status
+      // code of 200 this makes us difficult to trace it by looking on the nature of our code here
+      console.log("This is status code ", response.status);
       if (response.status === 200) {
         return response.json();
       } else {
@@ -136,7 +139,10 @@ export const loginUser = async (phone, password) => {
       }
     })
     .then((data) => Promise.resolve(data))
-    .catch((error) => Promise.reject({ error }));
+    .catch((error) => {
+      console.log("Error occured ", error.message);
+      return Promise.reject({ error });
+    });
 };
 
 export const CompleteOfficerProfileHandler = async (fdata, headers) => {
@@ -217,6 +223,51 @@ export const ResearcherArticles = async (user_id) => {
       if (res.status !== 200) {
         res.json().then((data) => {
           console.log("THIS IS WHAT WE RESOLVE ", data.details);
+          throw new Error(data.details);
+        });
+      }
+      return res.json();
+    })
+    .then((resData) => {
+      return Promise.resolve(resData);
+    })
+    .catch((err) => {
+      return Promise.reject(err);
+    });
+};
+
+export const ResearcherArticlesList = async () => {
+  return fetch(`${BASE_URL}/api/rarticleslist/`)
+    .then((res) => {
+      if (res.status !== 200) {
+        res.json().then((data) => {
+          throw new Error(data.details);
+        });
+      }
+      return res.json();
+    })
+    .then((resData) => {
+      console.log("reData ", resData);
+      return Promise.resolve(resData);
+    })
+    .catch((err) => {
+      return Promise.reject(err);
+    });
+};
+
+export const OfficerPosts = async (user_id) => {
+  return fetch(`${BASE_URL}/api/officerposts/`, {
+    method: "POST",
+    body: JSON.stringify({
+      user_id,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((res) => {
+      if (res.status !== 200) {
+        res.json().then((data) => {
           throw new Error(data.details);
         });
       }

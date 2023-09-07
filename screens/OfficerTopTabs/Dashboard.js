@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useContext } from "react";
 import {
   View,
   Text,
@@ -13,8 +13,12 @@ import { SearchBar } from "@rneui/themed";
 import DataTable from "../../components/DataTable";
 import { LinearGradient } from "expo-linear-gradient";
 import { Icon } from "@muratoner/semantic-ui-react-native";
+import { AppContext } from "../../store/context";
+import DataTable2 from "../../components/DataTable2";
 
 function Dashboard() {
+  const AppCtx = useContext(AppContext);
+
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.cardHolder}>
@@ -22,12 +26,12 @@ function Dashboard() {
           gradientColors={[COLORS.primary, COLORS.secondary]}
           title="Total Posted"
           subtitle="Articles"
-          number={0}
+          number={AppCtx.officerposts.length}
         />
         <DashboardCard
           gradientColors={[COLORS.primary, COLORS.secondary]}
-          title="Available"
-          subtitle="Researches"
+          title="Total Today"
+          subtitle="Posts"
           style={{ marginLeft: "2%" }}
           number={0}
         />
@@ -37,45 +41,69 @@ function Dashboard() {
         style={styles.tableHolder}
       >
         <View style={styles.headerHolder}>
-          <Text style={styles.header}>{"ALL ARTICLES"}</Text>
+          <Text style={styles.header}>{"POSTED ARTICLES"}</Text>
           {/* <TouchableOpacity style={styles.addNew} onPress={() => {}}>
             <Icon name="add" style={styles.headerIcon} />
           </TouchableOpacity> */}
         </View>
-        <View style={{ marginTop: "2%" }}>
-          <SearchBar
-            platform={Platform.OS === "ios" ? "ios" : "default"}
-            showCancel={false}
-            round
-            placeholder="Search..."
-            light
-            autoCorrect={false}
-            placeholderTextColor={COLORS.primary}
-            leftIcon={{ color: COLORS.primary }}
-            inputContainerStyle={{
-              height: 20,
-              fontFamily: "montserrat-17",
-            }}
-            inputStyle={{
-              fontFamily: "montserrat-17",
-              fontSize: 14,
-              color: COLORS.primary,
-            }}
-            onChangeText={() => console.log("Hello world")}
-            value={"search"}
-            cancelButtonTitle=""
-            containerStyle={{
-              backgroundColor: "transparent",
-              borderBottomColor: "transparent",
-              borderTopColor: "transparent",
+        {AppCtx.officerposts.length > 0 ? (
+          <>
+            <View style={{ marginTop: "2%" }}>
+              <SearchBar
+                platform={Platform.OS === "ios" ? "ios" : "default"}
+                showCancel={false}
+                round
+                placeholder="Search..."
+                light
+                autoCorrect={false}
+                placeholderTextColor={COLORS.primary}
+                leftIcon={{ color: COLORS.primary }}
+                inputContainerStyle={{
+                  height: 20,
+                  fontFamily: "montserrat-17",
+                }}
+                inputStyle={{
+                  fontFamily: "montserrat-17",
+                  fontSize: 14,
+                  color: COLORS.primary,
+                }}
+                onChangeText={() => console.log("Hello world")}
+                value={"search"}
+                cancelButtonTitle=""
+                containerStyle={{
+                  backgroundColor: "transparent",
+                  borderBottomColor: "transparent",
+                  borderTopColor: "transparent",
 
-              marginHorizontal: "2%",
+                  marginHorizontal: "2%",
+                }}
+              />
+            </View>
+            <ScrollView style={styles.innerTableHolder}>
+              <DataTable2 data={[]} />
+            </ScrollView>
+          </>
+        ) : (
+          <View
+            style={{
+              height: 100,
+              marginHorizontal: "5%",
+              justifyContent: "center",
+              alignItems: "center",
             }}
-          />
-        </View>
-        <ScrollView style={styles.innerTableHolder}>
-          <DataTable data={{}} />
-        </ScrollView>
+          >
+            <Text
+              style={{
+                fontFamily: "montserrat-17",
+                fontSize: 16,
+                color: "white",
+                textAlign: "center",
+              }}
+            >
+              No posted content yet
+            </Text>
+          </View>
+        )}
       </LinearGradient>
     </View>
   );

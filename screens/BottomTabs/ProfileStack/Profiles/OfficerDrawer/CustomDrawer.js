@@ -14,11 +14,9 @@ const deviceHeight = Dimensions.get("window").height;
 function OfficerDrawerContent(props) {
   const AppCtx = useContext(AppContext);
 
-  console.log("This is what i received ", props.usergroup);
-
   return (
     <View style={styles.container}>
-      <Banner usergroup={props.usergroup} profile={props.moreData} />
+      <Banner usergroup={props.usergroup} profile={props.profile} />
       <ScrollView style={styles.parentOuterView} {...props}>
         <View style={styles.outerView}>
           <View>

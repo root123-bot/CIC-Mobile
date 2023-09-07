@@ -13,6 +13,8 @@ export const AppContext = createContext({
   stillExecutingUserMetadata: true,
   isSettingInactive: false,
   userrawpost: [],
+  rArticles: [],
+  officerposts: [],
   logout: () => {},
   manipulateUserMetadata: (metadata) => {},
   manipulateIsAunthenticated: (status) => {},
@@ -24,9 +26,15 @@ export const AppContext = createContext({
   manipulateIsSettingInactive: (status) => {},
   updateUserRawPost: (posts) => {},
   manipulateUserRawPost: (post) => {},
+  manipulateRArticles: (article) => {},
+  updateRArticles: (articles) => {},
+  manipulateOfficerPosts: (post) => {},
+  updateOfficerPosts: (posts) => {},
 });
 
 function AppContextProvider({ children }) {
+  const [rArticles, setRArticles] = useState([]); // this is for researcher articles
+  const [officerposts, setOfficerPosts] = useState([]); // this is for officer posts
   const [usermetadata, setUserMetadata] = useState({});
   const [isAunthenticated, setIsAunthenticated] = useState();
   const [toggleOnAbout, setToggleOnAbout] = useState(true);
@@ -47,6 +55,26 @@ function AppContextProvider({ children }) {
 
   function updateUserRawPost(posts) {
     setUserRawPost(posts);
+  }
+
+  function updateRArticles(articles) {
+    setRArticles(articles);
+  }
+
+  function manipulateOfficerPosts(post) {
+    setOfficerPosts((prevState) => {
+      return [post, ...prevState];
+    });
+  }
+
+  function updateOfficerPosts(posts) {
+    setOfficerPosts(posts);
+  }
+
+  function manipulateRArticles(article) {
+    setRArticles((prevState) => {
+      return [article, ...prevState];
+    });
   }
 
   function manipulateUserRawPost(post) {
@@ -203,6 +231,8 @@ function AppContextProvider({ children }) {
     lastLoginPhoneNumber,
     isSettingInactive,
     userrawpost,
+    rArticles,
+    officerposts,
     logout,
     manipulateIsAunthenticated,
     manipulateUserMetadata,
@@ -214,6 +244,10 @@ function AppContextProvider({ children }) {
     manipulateIsSettingInactive,
     updateUserRawPost,
     manipulateUserRawPost,
+    manipulateRArticles,
+    updateRArticles,
+    manipulateOfficerPosts,
+    updateOfficerPosts,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

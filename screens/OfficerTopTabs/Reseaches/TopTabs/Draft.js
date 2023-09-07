@@ -1,92 +1,83 @@
-import React, { memo, useContext, useEffect, useState } from "react";
+import React, { useState, useEffect, useContext, memo } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
-import DashboardCard from "../../../../components/DashboardCard";
-import { COLORS } from "../../../../constants/colors";
-import { SearchBar } from "@rneui/themed";
-import DataTable from "../../../../components/DataTable";
 import { LinearGradient } from "expo-linear-gradient";
-import { Icon } from "@muratoner/semantic-ui-react-native";
+import { HelperText } from "react-native-paper";
 import { AppContext } from "../../../../store/context";
-import ActionButton from "react-native-action-button";
-// import Icon from "react-native-vector-icons/Ionicons";
+import { SearchBar } from "@rneui/themed";
+import { Icon } from "@muratoner/semantic-ui-react-native";
+import { COLORS } from "../../../../constants/colors";
+import DataTable3 from "../../../../components/DataTable3";
 
-function ResearcherProfile({ navigation }) {
+function DraftResearches() {
   const AppCtx = useContext(AppContext);
-
   const [search, setSearch] = useState("");
-  const [data, setData] = useState(AppCtx.userrawpost);
+  const [data, setData] = useState(
+    AppCtx.rArticles
+      .filter((article) => article.is_draft)
+      .filter((val) => +val.drafted_by === +AppCtx.usermetadata.get_user_id)
+  );
 
   useEffect(() => {
-    setData(AppCtx.userrawpost);
-  }, [AppCtx.userrawpost.length]);
+    AppCtx.rArticles
+      .filter((article) => article.is_draft)
+      .filter((val) => +val.drafted_by === +AppCtx.usermetadata.get_user_id);
+  }, [AppCtx.rArticles.length]);
 
   const searchHandler = (text) => {
     setSearch(text);
 
-    const result = AppCtx.userrawpost.filter((item) => {
-      return (
-        item.title.toLowerCase().includes(text.toLowerCase()) ||
-        item.date_posted
-          .split("T")[0]
-          .split("-")
-          .reverse()
-          .join("-")
-          .includes(text.toLowerCase())
-      );
-    });
+    const result = AppCtx.rArticles
+      .filter((article) => article.is_draft)
+      .filter((val) => +val.drafted_by === +AppCtx.usermetadata.get_user_id)
+      .filter((item) => {
+        return (
+          item.title.toLowerCase().includes(text.toLowerCase()) ||
+          item.date_posted
+            .split("T")[0]
+            .split("-")
+            .reverse()
+            .join("-")
+            .includes(text.toLowerCase())
+        );
+      });
 
     // set the data passed to the table
     setData(result);
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <View style={styles.cardHolder}>
-        <DashboardCard
-          gradientColors={[COLORS.primary, COLORS.secondary]}
-          title="Total Added"
-          subtitle="Articles"
-          number={AppCtx.userrawpost.length}
-        />
-        <DashboardCard
-          gradientColors={[COLORS.primary, COLORS.secondary]}
-          title="Published"
-          subtitle="Articles"
-          style={{ marginLeft: "2%" }}
-          number={0}
-        />
-      </View>
-
+    <View
+      style={{
+        flex: 1,
+      }}
+    >
       <LinearGradient
         colors={[COLORS.primary, COLORS.secondary]}
         style={styles.tableHolder}
       >
-        <View
-          style={{
-            zIndex: 100,
-            position: "absolute",
-            right: 20,
-            bottom: 20,
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("CreateArticle");
+        <View style={styles.headerHolder}>
+          <Text style={styles.header}>{"ALL DRAFTED RESEARCHES"}</Text>
+          <HelperText
+            padding={false}
+            style={{
+              fontFamily: "overpass-reg",
+              fontSize: 12,
+              color: "white",
             }}
           >
-            <Icon size={50} name="add-circle" color={COLORS.thirdary} />
-          </TouchableOpacity>
+            ** You saved them as drafts.
+          </HelperText>
         </View>
-        <View style={styles.headerHolder}>
-          <Text style={styles.header}>{"ALL ARTICLES"}</Text>
-        </View>
-        {AppCtx.userrawpost.length > 0 ? (
+        {AppCtx.rArticles
+          .filter((article) => article.is_draft)
+          .filter((val) => +val.drafted_by === +AppCtx.usermetadata.get_user_id)
+          .length > 0 ? (
           <>
             <View style={{ marginTop: "2%" }}>
               <SearchBar
@@ -120,7 +111,7 @@ function ResearcherProfile({ navigation }) {
               />
             </View>
             <ScrollView style={styles.innerTableHolder}>
-              <DataTable data={data} />
+              <DataTable3 data={data} />
             </ScrollView>
           </>
         ) : (
@@ -140,7 +131,7 @@ function ResearcherProfile({ navigation }) {
                 textAlign: "center",
               }}
             >
-              No articles added yet
+              No drafts added yet
             </Text>
           </View>
         )}
@@ -149,7 +140,7 @@ function ResearcherProfile({ navigation }) {
   );
 }
 
-export default memo(ResearcherProfile);
+export default memo(DraftResearches);
 
 const styles = StyleSheet.create({
   cardHolder: {
@@ -161,7 +152,7 @@ const styles = StyleSheet.create({
     flex: 0.2,
   },
   tableHolder: {
-    flex: 0.75,
+    flex: 0.95,
     maxHeight: "100%",
     margin: "2%",
     marginTop: "5%",
@@ -189,8 +180,6 @@ const styles = StyleSheet.create({
   headerHolder: {
     marginHorizontal: "4%",
     marginTop: "4%",
-    flexDirection: "row",
-    justifyContent: "space-between",
   },
   addNew: {
     width: 28,

@@ -16,7 +16,11 @@ import { TransparentPopUpIconMessage } from "./Messages";
 // import { CustomizedLottieMessage, TransparentPopUpIconMessage } from "./Ui";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LoadingSpinner } from "./Ui";
-import { ResearcherArticles } from "../utils/requests";
+import {
+  OfficerPosts,
+  ResearcherArticles,
+  ResearcherArticlesList,
+} from "../utils/requests";
 
 function AdvancedPanel({
   title,
@@ -245,8 +249,22 @@ function AdvancedPanel({
       usermetadata.profile_is_completed &&
       usermetadata.is_active
     ) {
-      AppCtx.manipulateIsSettingInactive(false);
-      navigation.navigate("OfficerProfile");
+      try {
+        // all researcher articles
+        const rarticles = await ResearcherArticlesList();
+        console.log("rarticles ", rarticles);
+        AppCtx.updateRArticles(rarticles);
+        // all officer articles
+        const myposts = await OfficerPosts(AppCtx.usermetadata.get_user_id);
+        AppCtx.updateOfficerPosts(myposts);
+        AppCtx.manipulateIsSettingInactive(false);
+        navigation.navigate("OfficerProfile");
+      } catch (err) {
+        console.log("THIS IS ERROR MESSAGE ", err.message);
+        setFormSubmitLoader(false);
+        setShowAnimation(false);
+        alert(err.message);
+      }
     }
 
     AppCtx.manipulateIsSettingInactive(false);

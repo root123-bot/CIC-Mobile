@@ -48,10 +48,12 @@ import ResearcherDrawerContent from "./screens/BottomTabs/ProfileStack/Profiles/
 import OfficerDrawerContent from "./screens/BottomTabs/ProfileStack/Profiles/OfficerDrawer/CustomDrawer";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import Dashboard from "./screens/OfficerTopTabs/Dashboard";
-import Researches from "./screens/OfficerTopTabs/Researches";
+import Researches from "./screens/OfficerTopTabs/Reseaches";
 import QuestionAnswers from "./screens/OfficerTopTabs/QuestionAnswers";
 import CreateArticle from "./screens/Researcher/CreateArticle";
 import ViewEditArticle from "./screens/Researcher/ViewEditArticle";
+import Pure from "./screens/OfficerTopTabs/Reseaches/TopTabs/Pure";
+import Draft from "./screens/OfficerTopTabs/Reseaches/TopTabs/Draft";
 
 const Stack = createNativeStackNavigator();
 const Stack1 = createStackNavigator();
@@ -98,12 +100,14 @@ function ResearcherDrawer() {
 
 // Officer Drawer
 function OfficerDrawer() {
+  const AppCtx = useContext(AppContext);
   return (
     <Drawer.Navigator
       drawerContent={(props) => (
         <OfficerDrawerContent
           {...props}
           moreData={undefined}
+          profile={AppCtx.usermetadata}
           usergroup="Officer"
         />
       )}
@@ -352,6 +356,115 @@ const CustomTabBarButton = ({ children, onPress }) => (
   </TouchableOpacity>
 );
 
+function OfficerResearchesTopTabs({ route }) {
+  const layout = useWindowDimensions();
+  const [index, setIndex] = useState(0);
+
+  const [routes] = useState([
+    { key: "forth", title: "Pure" },
+    { key: "fifth", title: "Drafts" },
+  ]);
+
+  return (
+    <>
+      <TabView
+        renderTabBar={renderTabBar2.bind(this, layout)}
+        navigationState={{ index, routes }}
+        renderScene={renderScene2}
+        onIndexChange={setIndex}
+        initialLayout={{ width: layout.width }}
+      />
+    </>
+  );
+}
+
+const renderScene2 = SceneMap({
+  forth: Pure,
+  fifth: Draft,
+});
+
+const renderTabBar2 = (layout, props) => {
+  const AppCtx = useContext(AppContext);
+
+  return (
+    <TabBar
+      {...props}
+      indicatorStyle={{ backgroundColor: COLORS.primary }}
+      style={{ backgroundColor: "white" }}
+      activeColor={COLORS.primary}
+      inactiveColor="grey"
+      renderBadge={({ route }) => {
+        if (route.key === "forth") {
+          return (
+            <View
+              style={{
+                position: "absolute",
+                left: -80,
+                top: 7,
+                backgroundColor: COLORS.primary,
+                width: 20,
+                height: 20,
+                borderRadius: 12,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 10,
+                  fontFamily: "montserrat-17",
+                }}
+              >
+                {AppCtx.rArticles.filter((article) => !article.is_draft).length}
+              </Text>
+            </View>
+          );
+        }
+        // only that he saved as draft, that's why we  have the field of drafted_by
+        if (route.key === "fifth") {
+          return (
+            <View
+              style={{
+                position: "absolute",
+                left: -70,
+                top: 7,
+                backgroundColor: COLORS.primary,
+                width: 20,
+                height: 20,
+                borderRadius: 12,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 10,
+                  fontFamily: "montserrat-17",
+                }}
+              >
+                {
+                  AppCtx.rArticles
+                    .filter((article) => article.is_draft)
+                    .filter(
+                      (val) =>
+                        +val.drafted_by === +AppCtx.usermetadata.get_user_id
+                    ).length
+                }
+              </Text>
+            </View>
+          );
+        }
+      }}
+      labelStyle={{
+        textTransform: "capitalize",
+        fontFamily: "montserrat-17",
+      }}
+    />
+  );
+};
+
 function OfficerTopTabs({ route }) {
   const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
@@ -377,21 +490,54 @@ function OfficerTopTabs({ route }) {
 
 const renderScene = SceneMap({
   first: Dashboard,
-  second: Researches,
+  second: OfficerResearchesTopTabs,
   third: QuestionAnswers,
 });
 
-const renderTabBar = (layout, props) => (
-  <TabBar
-    {...props}
-    indicatorStyle={{ backgroundColor: COLORS.primary }}
-    style={{ backgroundColor: "white" }}
-    scrollEnabled={true}
-    activeColor={COLORS.primary}
-    inactiveColor="grey"
-    labelStyle={{ textTransform: "capitalize", fontFamily: "montserrat-17" }}
-  />
-);
+const renderTabBar = (layout, props) => {
+  const AppCtx = useContext(AppContext);
+
+  return (
+    <TabBar
+      {...props}
+      indicatorStyle={{ backgroundColor: COLORS.primary }}
+      style={{ backgroundColor: "white" }}
+      scrollEnabled={true}
+      activeColor={COLORS.primary}
+      renderBadge={({ route }) => {
+        if (route.key === "second") {
+          return (
+            <View
+              style={{
+                position: "absolute",
+                left: -40,
+                top: 3,
+                backgroundColor: COLORS.primary,
+                width: 20,
+                height: 20,
+                borderRadius: 12,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 10,
+                  fontFamily: "montserrat-17",
+                }}
+              >
+                {AppCtx.rArticles.length}
+              </Text>
+            </View>
+          );
+        }
+      }}
+      inactiveColor="grey"
+      labelStyle={{ textTransform: "capitalize", fontFamily: "montserrat-17" }}
+    />
+  );
+};
 
 function MyTabs() {
   return (
