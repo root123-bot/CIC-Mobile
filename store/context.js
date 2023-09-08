@@ -15,6 +15,7 @@ export const AppContext = createContext({
   userrawpost: [],
   rArticles: [],
   officerposts: [],
+  articleUpdated: 0,
   logout: () => {},
   manipulateUserMetadata: (metadata) => {},
   manipulateIsAunthenticated: (status) => {},
@@ -30,6 +31,8 @@ export const AppContext = createContext({
   updateRArticles: (articles) => {},
   manipulateOfficerPosts: (post) => {},
   updateOfficerPosts: (posts) => {},
+  manipulateArticleUpdated: (status) => {},
+  incrementArticleUpdated: () => {},
 });
 
 function AppContextProvider({ children }) {
@@ -45,12 +48,17 @@ function AppContextProvider({ children }) {
     useState(true);
   const [isSettingInactive, setIsSettingInactive] = useState(false);
   const [userrawpost, setUserRawPost] = useState([]);
+  const [articleUpdated, setArticleUpdated] = useState(0);
   function manipulateIsAunthenticated(status) {
     setIsAunthenticated(status);
   }
 
   function manipulateIsSettingInactive(status) {
     setIsSettingInactive(status);
+  }
+
+  function manipulateArticleUpdated(status) {
+    setArticleUpdated(status);
   }
 
   function updateUserRawPost(posts) {
@@ -65,6 +73,10 @@ function AppContextProvider({ children }) {
     setOfficerPosts((prevState) => {
       return [post, ...prevState];
     });
+  }
+
+  function incrementArticleUpdated() {
+    setArticleUpdated((prevState) => prevState + 1);
   }
 
   function updateOfficerPosts(posts) {
@@ -241,6 +253,7 @@ function AppContextProvider({ children }) {
     userrawpost,
     rArticles,
     officerposts,
+    articleUpdated,
     logout,
     manipulateIsAunthenticated,
     manipulateUserMetadata,
@@ -256,6 +269,8 @@ function AppContextProvider({ children }) {
     updateRArticles,
     manipulateOfficerPosts,
     updateOfficerPosts,
+    manipulateArticleUpdated,
+    incrementArticleUpdated,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

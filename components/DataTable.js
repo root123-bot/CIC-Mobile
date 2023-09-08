@@ -76,7 +76,10 @@ function DataTable({ data }) {
                   <View style={[styles.columnHolder]}>
                     <Text
                       numberOfLines={1}
-                      style={[styles.colValue, { textAlign: "center" }]}
+                      style={[
+                        styles.colValue,
+                        { textAlign: "left", marginLeft: "25%" },
+                      ]}
                     >
                       {"No"}
                     </Text>

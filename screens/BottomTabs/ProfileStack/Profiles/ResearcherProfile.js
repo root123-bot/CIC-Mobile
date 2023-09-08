@@ -25,7 +25,7 @@ function ResearcherProfile({ navigation }) {
   // AppCtx.userrawpost how to detect its changed.. how
   useEffect(() => {
     setData(AppCtx.userrawpost);
-  }, [AppCtx.userrawpost.length]);
+  }, [AppCtx.userrawpost.length, AppCtx.addRegisterMetadata]);
 
   const searchHandler = (text) => {
     setSearch(text);

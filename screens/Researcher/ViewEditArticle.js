@@ -199,6 +199,7 @@ function ViewEditArticle({ navigation, route }) {
         console.log("result ", result);
         setIcon("check");
         AppCtx.manipulateUserRawPost(result);
+        AppCtx.incrementArticleUpdated();
         setMessage("Success");
         setShowAnimation(false);
         setTimeout(() => {
