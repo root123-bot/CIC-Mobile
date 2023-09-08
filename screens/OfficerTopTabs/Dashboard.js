@@ -1,4 +1,11 @@
-import React, { memo, useContext } from "react";
+import React, {
+  memo,
+  useMemo,
+  useContext,
+  useRef,
+  useCallback,
+  useEffect,
+} from "react";
 import {
   View,
   Text,
@@ -15,6 +22,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Icon } from "@muratoner/semantic-ui-react-native";
 import { AppContext } from "../../store/context";
 import DataTable2 from "../../components/DataTable2";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 
 function Dashboard() {
   const AppCtx = useContext(AppContext);

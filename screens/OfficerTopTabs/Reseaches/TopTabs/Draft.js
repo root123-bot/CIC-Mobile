@@ -13,6 +13,7 @@ import { SearchBar } from "@rneui/themed";
 import { Icon } from "@muratoner/semantic-ui-react-native";
 import { COLORS } from "../../../../constants/colors";
 import DataTable3 from "../../../../components/DataTable3";
+import DataTable4 from "../../../../components/DataTable4";
 
 function DraftResearches() {
   const AppCtx = useContext(AppContext);
@@ -24,10 +25,12 @@ function DraftResearches() {
   );
 
   useEffect(() => {
-    AppCtx.rArticles
-      .filter((article) => article.is_draft)
-      .filter((val) => +val.drafted_by === +AppCtx.usermetadata.get_user_id);
-  }, [AppCtx.rArticles.length]);
+    setData(
+      AppCtx.rArticles
+        .filter((article) => article.is_draft)
+        .filter((val) => +val.drafted_by === +AppCtx.usermetadata.get_user_id)
+    );
+  }, [AppCtx.rArticles.length, AppCtx.articleUpdated]);
 
   const searchHandler = (text) => {
     setSearch(text);
@@ -111,7 +114,10 @@ function DraftResearches() {
               />
             </View>
             <ScrollView style={styles.innerTableHolder}>
-              <DataTable3 data={data} />
+              <DataTable4
+                data={data}
+                onTapHandler={() => console.log("Someone tap me")}
+              />
             </ScrollView>
           </>
         ) : (

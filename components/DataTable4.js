@@ -4,7 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import { CustomLine } from "./Ui";
 import { COLORS } from "../constants/colors";
 
-function DataTable3({ data, onTapHandler }) {
+function DataTable4({ data, onTapHandler }) {
   const navigation = useNavigation();
 
   return (
@@ -21,6 +21,7 @@ function DataTable3({ data, onTapHandler }) {
           {data
             .map((val) => ({ title: val.title, id: val.id }))
             .map((value, index) => {
+              console.log("Value ", value);
               return (
                 <View key={`${index * Math.random()}.FO`}>
                   <TouchableOpacity
@@ -113,7 +114,7 @@ function DataTable3({ data, onTapHandler }) {
   );
 }
 
-export default DataTable3;
+export default DataTable4;
 
 const styles = StyleSheet.create({
   hr: {

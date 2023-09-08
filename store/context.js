@@ -33,6 +33,7 @@ export const AppContext = createContext({
   updateOfficerPosts: (posts) => {},
   manipulateArticleUpdated: (status) => {},
   incrementArticleUpdated: () => {},
+  makeArticleDrafted: (article) => {},
 });
 
 function AppContextProvider({ children }) {
@@ -85,6 +86,12 @@ function AppContextProvider({ children }) {
 
   function manipulateRArticles(article) {
     setRArticles((prevState) => {
+      const exisstingOne = prevState.find((item) => item.id === article.id);
+      if (exisstingOne) {
+        const index = prevState.indexOf(exisstingOne);
+        prevState[index] = article;
+        return prevState;
+      }
       return [article, ...prevState];
     });
   }
