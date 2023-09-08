@@ -72,7 +72,7 @@ function DataTable4({ data, onTapHandler }) {
         <View style={[styles.innerContainer, { width: "26%" }]}>
           <View>
             <Text numberOfLines={1} style={styles.header}>
-              Date
+              Date Updated
             </Text>
           </View>
           {Platform.OS === "ios" && (
@@ -81,7 +81,11 @@ function DataTable4({ data, onTapHandler }) {
 
           {/* my date data */}
           {data
-            .map((val) => ({ date_posted: val.date_posted, id: val.id }))
+            .map((val) => ({
+              date_posted: val.date_posted,
+              id: val.id,
+              date_updated: val.date_updated,
+            }))
             .map((value, index) => (
               <View key={`${index * Math.random()}.FO`}>
                 <TouchableOpacity
@@ -95,7 +99,7 @@ function DataTable4({ data, onTapHandler }) {
                 >
                   <View style={[styles.columnHolder]}>
                     <Text numberOfLines={1} style={styles.colValue}>
-                      {`${value.date_posted
+                      {`${value.date_updated
                         .split("T")[0]
                         .split("-")
                         .reverse()

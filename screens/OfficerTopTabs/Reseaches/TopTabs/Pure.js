@@ -87,7 +87,7 @@ function PureResearches() {
       .filter((item) => {
         return (
           item.title.toLowerCase().includes(text.toLowerCase()) ||
-          item.date_posted
+          item.date_updated
             .split("T")[0]
             .split("-")
             .reverse()
