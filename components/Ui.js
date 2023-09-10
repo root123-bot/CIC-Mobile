@@ -26,6 +26,7 @@ import { BASE_URL } from "../constants/domain";
 import * as ImageCache from "react-native-expo-image-cache";
 import { AppContext } from "../store/context";
 import { useNavigation } from "@react-navigation/native";
+import { LikePost, UnlikePost } from "../utils/requests";
 export const NavBar = () => {
   return (
     <View>
@@ -127,9 +128,16 @@ export const Post = ({ metadata, style, image, author }) => {
     ).path
   );
 
-  const [icon, setIcon] = useState("hearto");
+  const [icon, setIcon] = useState(
+    metadata.get_likes.likes.find(
+      (item) => +item.sender_id === +AppCtx.usermetadata.get_user_id
+    )
+      ? "heart"
+      : "hearto"
+  );
   const [articleLiked, setArticleLiked] = useState(0);
-  const [likes, setLikes] = useState(0);
+  //
+  const [likes, setLikes] = useState(metadata.get_likes.total);
   const likePostHandler = async (post) => {
     console.log("post ", post);
     console.log("Im the one executed ", AppCtx.isAunthenticated);
@@ -156,21 +164,30 @@ export const Post = ({ metadata, style, image, author }) => {
         ]
       );
     } else {
+      // by checking on "hearto" and "heart" we'll make sure the user does not like the same post twice
+      // its important to call the likeRArticle function so as to update our context
       if (icon === "hearto") {
-        setIcon("heart");
-        // AppCtx.LikeRARticle(post);
-        // setArticleLiked(articleLiked + 1);
+        console.log("I need to like post");
+        AppCtx.likeRArticle(post);
         setLikes(likes + 1);
+        setIcon("heart");
+
+        LikePost(post.id, AppCtx.usermetadata.get_user_id);
       } else {
-        setIcon("hearto");
+        console.log("I need to unlike post");
         setLikes(likes > 0 ? likes - 1 : 0);
+        AppCtx.unlikeRArticle(post);
+        setIcon("hearto");
+
+        // unlike post on server
+        UnlikePost(post.id, AppCtx.usermetadata.get_user_id);
       }
     }
   };
 
-  useEffect(() => {
-    metadata.get_likes.total + 1;
-  }, [articleLiked]);
+  // useEffect(() => {
+  //   metadata.get_likes.total + 1;
+  // }, [articleLiked]);
 
   return (
     <View>
@@ -278,17 +295,6 @@ export const Post = ({ metadata, style, image, author }) => {
             {metadata.content}
           </Text>
           <View style={{ marginVertical: 10 }}>
-            {/* <Image
-              source={
-                image ? image : require("../assets/images/background/3.jpg")
-              }
-              resizeMode="cover"
-              style={{
-                width: "100%",
-                height: 200,
-                borderRadius: 15,
-              }}
-            /> */}
             <ImageCache.Image
               {...{
                 preview: {

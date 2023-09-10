@@ -311,6 +311,62 @@ export const PublishArticle = async (fdata, headers) => {
     .catch((error) => Promise.reject(error));
 };
 
+export const UnlikePost = async (post_id, user_id) => {
+  return fetch(`${BASE_URL}/api/downvote/`, {
+    method: "POST",
+    body: JSON.stringify({
+      post_id,
+      user_id,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((res) => {
+      if (res.status !== 200) {
+        res.json().then((data) => {
+          console.log("THIS IS WHAT WE RESOLVE ", data.details);
+          throw new Error(data.details);
+        });
+      }
+      return res.json();
+    })
+    .then((resData) => {
+      return Promise.resolve(resData);
+    })
+    .catch((err) => {
+      return Promise.reject(err);
+    });
+};
+
+export const LikePost = async (post_id, user_id) => {
+  return fetch(`${BASE_URL}/api/likepost/`, {
+    method: "POST",
+    body: JSON.stringify({
+      post_id,
+      user_id,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((res) => {
+      if (res.status !== 200) {
+        res.json().then((data) => {
+          console.log("THIS IS WHAT WE RESOLVE ", data.details);
+          throw new Error(data.details);
+        });
+      }
+      return res.json();
+    })
+    .then((resData) => {
+      return Promise.resolve(resData);
+    })
+    .catch((err) => {
+      return Promise.reject(err);
+    });
+};
+
 export const ResearcherArticles = async (user_id) => {
   return fetch(`${BASE_URL}/api/rarticles/`, {
     method: "POST",

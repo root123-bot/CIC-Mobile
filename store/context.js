@@ -34,7 +34,8 @@ export const AppContext = createContext({
   manipulateArticleUpdated: (status) => {},
   incrementArticleUpdated: () => {},
   makeArticleDrafted: (article) => {},
-  LikeRARticle: (article) => {},
+  likeRArticle: (article) => {},
+  unlikeRArticle: (article) => {},
 });
 
 function AppContextProvider({ children }) {
@@ -85,7 +86,7 @@ function AppContextProvider({ children }) {
     setOfficerPosts(posts);
   }
 
-  function LikeRARticle(article) {
+  function likeRArticle(article) {
     console.log("Article ", article);
     setRArticles((prevState) => {
       const existingOne = prevState.find((item) => item.id === article.id);
@@ -96,6 +97,30 @@ function AppContextProvider({ children }) {
           get_likes: {
             ...existingOne.get_likes,
             total: existingOne.get_likes.total + 1,
+          },
+        };
+
+        console.log("COPIED ", copied);
+
+        const index = prevState.indexOf(existingOne);
+        prevState[index] = copied;
+        return prevState;
+      }
+      return [article, ...prevState];
+    });
+  }
+
+  function unlikeRArticle(article) {
+    console.log("Article ", article);
+    setRArticles((prevState) => {
+      const existingOne = prevState.find((item) => item.id === article.id);
+      console.log("Existing one ", existingOne);
+      if (existingOne) {
+        const copied = {
+          ...existingOne,
+          get_likes: {
+            ...existingOne.get_likes,
+            total: existingOne.get_likes.total - 1,
           },
         };
 
@@ -303,7 +328,8 @@ function AppContextProvider({ children }) {
     updateOfficerPosts,
     manipulateArticleUpdated,
     incrementArticleUpdated,
-    LikeRARticle,
+    likeRArticle,
+    unlikeRArticle,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
