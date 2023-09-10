@@ -36,6 +36,7 @@ export const AppContext = createContext({
   makeArticleDrafted: (article) => {},
   likeRArticle: (article) => {},
   unlikeRArticle: (article) => {},
+  commentArticle: (metadata) => {},
 });
 
 function AppContextProvider({ children }) {
@@ -107,6 +108,33 @@ function AppContextProvider({ children }) {
         return prevState;
       }
       return [article, ...prevState];
+    });
+  }
+
+  function commentArticle(metadata, comment) {
+    setRArticles((prevState) => {
+      const existingOne = prevState.find((item) => item.id === metadata.id);
+      if (existingOne) {
+        const copied = {
+          ...existingOne,
+          get_comments: {
+            ...existingOne.get_comments,
+            total: existingOne.get_comments.total + 1,
+            comments: [
+              ...existingOne.get_comments.comments,
+              {
+                sender_id: usermetadata.get_user_id,
+                comment,
+              },
+            ],
+          },
+        };
+
+        const index = prevState.indexOf(existingOne);
+        prevState[index] = copied;
+        return prevState;
+      }
+      return [metadata, ...prevState];
     });
   }
 
@@ -330,6 +358,7 @@ function AppContextProvider({ children }) {
     incrementArticleUpdated,
     likeRArticle,
     unlikeRArticle,
+    commentArticle,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -115,7 +115,14 @@ export const CustomLine = ({ color, style }) => {
   );
 };
 
-export const Post = ({ metadata, style, image, author }) => {
+export const Post = ({
+  metadata,
+  style,
+  image,
+  author,
+  writeCommentHandler,
+  viewCommentHandler,
+}) => {
   const AppCtx = useContext(AppContext);
   const navigation = useNavigation();
   console.log(
@@ -182,6 +189,34 @@ export const Post = ({ metadata, style, image, author }) => {
         // unlike post on server
         UnlikePost(post.id, AppCtx.usermetadata.get_user_id);
       }
+    }
+  };
+
+  const commentPostHandler = async (metadata) => {
+    if (!AppCtx.isAunthenticated) {
+      Alert.alert(
+        "Login is Required?",
+        "To trigger this action you should register/login.",
+        [
+          {
+            text: "Cancel",
+          },
+          {
+            text: "Continue",
+            style: "destructive",
+            onPress: () => {
+              navigation.navigate("ProfileStack", {
+                screen: "LoginScreen",
+                params: {
+                  next: "Home",
+                },
+              });
+            },
+          },
+        ]
+      );
+    } else {
+      return writeCommentHandler(metadata);
     }
   };
 
@@ -365,13 +400,7 @@ export const Post = ({ metadata, style, image, author }) => {
               {likes}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() =>
-              console.log(
-                "Display drag top presentation screen to display comments"
-              )
-            }
-          >
+          <TouchableOpacity onPress={viewCommentHandler.bind(this, metadata)}>
             <Text
               style={{
                 fontFamily: "overpass-reg",
@@ -424,11 +453,7 @@ export const Post = ({ metadata, style, image, author }) => {
               justifyContent: "center",
               alignItems: Platform.OS === "ios" ? "flex-start" : "center",
             }}
-            onPress={() =>
-              console.log(
-                "Just popup the presentation stacked screen to comment write the comment, if we can its okay to display other comments also"
-              )
-            }
+            onPress={commentPostHandler.bind(this, metadata)}
           >
             <FontAwesome name="comment-o" size={20} color={COLORS.forthy} />
             <Text

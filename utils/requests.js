@@ -339,6 +339,35 @@ export const UnlikePost = async (post_id, user_id) => {
     });
 };
 
+export const CommentPost = async (post_id, user_id, comment) => {
+  return fetch(`${BASE_URL}/api/commentpost/`, {
+    method: "POST",
+    body: JSON.stringify({
+      post_id,
+      user_id,
+      comment,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((res) => {
+      if (res.status !== 200) {
+        res.json().then((data) => {
+          console.log("THIS IS WHAT WE RESOLVE ", data.details);
+          throw new Error(data.details);
+        });
+      }
+      return res.json();
+    })
+    .then((resData) => {
+      return Promise.resolve(resData);
+    })
+    .catch((err) => {
+      return Promise.reject(err);
+    });
+};
+
 export const LikePost = async (post_id, user_id) => {
   return fetch(`${BASE_URL}/api/likepost/`, {
     method: "POST",
