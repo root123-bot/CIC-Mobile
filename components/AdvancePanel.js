@@ -157,7 +157,7 @@ function AdvancedPanel({
         // then i think we should delete that user because if you deleted his profile what you expect, you expect him to have
         // the "unrecognized" group
         // show descriptive alert that the account has been deleted so he should create a new one..
-        alert("Your account have been deleted, register again");
+        alert("Session expired, login again");
         setFormSubmitLoader(false);
         setShowAnimation(false);
       } else {

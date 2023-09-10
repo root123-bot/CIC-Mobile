@@ -5,7 +5,7 @@ import {
   FontAwesome5,
   Ionicons,
 } from "@expo/vector-icons";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useContext, useState } from "react";
 import {
   View,
   Text,
@@ -15,12 +15,17 @@ import {
   TouchableOpacity,
   Pressable,
   Platform,
+  Alert,
 } from "react-native";
 import { Icon } from "react-native-elements";
 import { COLORS } from "../constants/colors";
 import AnimatedLottieView from "lottie-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-
+import moment from "moment";
+import { BASE_URL } from "../constants/domain";
+import * as ImageCache from "react-native-expo-image-cache";
+import { AppContext } from "../store/context";
+import { useNavigation } from "@react-navigation/native";
 export const NavBar = () => {
   return (
     <View>
@@ -110,6 +115,63 @@ export const CustomLine = ({ color, style }) => {
 };
 
 export const Post = ({ metadata, style, image, author }) => {
+  const AppCtx = useContext(AppContext);
+  const navigation = useNavigation();
+  console.log(
+    "THIS IS PHOTO PATH ",
+    metadata.posted_media.find(
+      (value) =>
+        value.path.includes(".jpg") ||
+        value.path.includes(".png") ||
+        value.path.includes(".jpeg")
+    ).path
+  );
+
+  const [icon, setIcon] = useState("hearto");
+  const [articleLiked, setArticleLiked] = useState(0);
+  const [likes, setLikes] = useState(0);
+  const likePostHandler = async (post) => {
+    console.log("post ", post);
+    console.log("Im the one executed ", AppCtx.isAunthenticated);
+    if (!AppCtx.isAunthenticated) {
+      Alert.alert(
+        "Login is Required?",
+        "To trigger this action you should register/login.",
+        [
+          {
+            text: "Cancel",
+          },
+          {
+            text: "Continue",
+            style: "destructive",
+            onPress: () => {
+              navigation.navigate("ProfileStack", {
+                screen: "LoginScreen",
+                params: {
+                  next: "Home",
+                },
+              });
+            },
+          },
+        ]
+      );
+    } else {
+      if (icon === "hearto") {
+        setIcon("heart");
+        // AppCtx.LikeRARticle(post);
+        // setArticleLiked(articleLiked + 1);
+        setLikes(likes + 1);
+      } else {
+        setIcon("hearto");
+        setLikes(likes > 0 ? likes - 1 : 0);
+      }
+    }
+  };
+
+  useEffect(() => {
+    metadata.get_likes.total + 1;
+  }, [articleLiked]);
+
   return (
     <View>
       <View
@@ -126,11 +188,31 @@ export const Post = ({ metadata, style, image, author }) => {
             alignItems: "center",
           }}
         >
-          <Image
+          {/* <Image
             source={require("../assets/images/human.png")}
             style={{
               width: 38,
               height: 38,
+              borderRadius: 17.5,
+            }}
+          /> */}
+          <ImageCache.Image
+            {...{
+              preview: {
+                uri: `${BASE_URL}${metadata.get_researcher.photo}`,
+              },
+              uri: `${BASE_URL}${metadata.get_researcher.photo}`,
+            }}
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 17.5,
+            }}
+            imageStyle={{
+              width: 38,
+              height: 38,
+              opacity: 0.15,
+              flex: 1,
               borderRadius: 17.5,
             }}
           />
@@ -148,7 +230,7 @@ export const Post = ({ metadata, style, image, author }) => {
                   fontSize: 16,
                 }}
               >
-                {author}
+                {metadata.get_researcher.username}
               </Text>
             </TouchableOpacity>
             <Text
@@ -158,7 +240,11 @@ export const Post = ({ metadata, style, image, author }) => {
                 color: COLORS.forthy,
               }}
             >
-              19 Aug 23
+              {`${moment
+                .utc(metadata.date_updated)
+                .local()
+                .startOf("seconds")
+                .fromNow()}`}
             </Text>
           </View>
         </View>
@@ -189,12 +275,10 @@ export const Post = ({ metadata, style, image, author }) => {
             }}
             numberOfLines={2}
           >
-            Hello wolrd im the first one to come and comment here and i want to
-            show you how this issue is executed, Thank you sir i wish i will
-            meet you soon and after that we'll have the good chart
+            {metadata.content}
           </Text>
           <View style={{ marginVertical: 10 }}>
-            <Image
+            {/* <Image
               source={
                 image ? image : require("../assets/images/background/3.jpg")
               }
@@ -204,6 +288,42 @@ export const Post = ({ metadata, style, image, author }) => {
                 height: 200,
                 borderRadius: 15,
               }}
+            /> */}
+            <ImageCache.Image
+              {...{
+                preview: {
+                  uri: `${BASE_URL}${
+                    metadata.posted_media.find(
+                      (value) =>
+                        value.path.includes(".jpg") ||
+                        value.path.includes(".png") ||
+                        value.path.includes(".jpeg")
+                    ).path
+                  }`,
+                },
+                uri: `${BASE_URL}${
+                  metadata.posted_media.find(
+                    (value) =>
+                      value.path.includes(".jpg") ||
+                      value.path.includes(".png") ||
+                      value.path.includes(".jpeg")
+                  ).path
+                }`,
+              }}
+              style={{
+                width: "100%",
+                height: 200,
+                borderRadius: 15,
+              }}
+              imageStyle={
+                {
+                  // width: 38,
+                  // height: 38,
+                  // opacity: 0.15,
+                  // flex: 1,
+                  // borderRadius: 17.5,
+                }
+              }
             />
           </View>
         </Pressable>
@@ -236,7 +356,7 @@ export const Post = ({ metadata, style, image, author }) => {
                 marginLeft: 5,
               }}
             >
-              124
+              {likes}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -253,7 +373,7 @@ export const Post = ({ metadata, style, image, author }) => {
                 fontSize: 16,
               }}
             >
-              58 Comments
+              {`${metadata.get_comments.total} Comments`}
             </Text>
           </TouchableOpacity>
         </View>
@@ -276,11 +396,9 @@ export const Post = ({ metadata, style, image, author }) => {
               justifyContent: "center",
               alignItems: Platform.OS === "ios" ? "flex-start" : "center",
             }}
-            onPress={() =>
-              console.log("Just like the post/or dislike if i've already liked")
-            }
+            onPress={likePostHandler.bind(this, metadata)}
           >
-            <AntDesign name="hearto" size={20} color={COLORS.forthy} />
+            <AntDesign name={icon} size={20} color={COLORS.primary} />
             <Text
               style={{
                 fontFamily: "overpass-reg",

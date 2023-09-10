@@ -34,6 +34,7 @@ import * as ImageCache from "react-native-expo-image-cache";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { TransparentPopUpIconMessage } from "../../../../components/Messages";
 import { DraftArticle, UpdateArticle } from "../../../../utils/requests";
+import { PublishArticle } from "../../../../utils/requests";
 import { CustomLine, LoadingSpinner } from "../../../../components/Ui";
 import { BASE_URL } from "../../../../constants/domain";
 import { useNavigation } from "@react-navigation/native";
@@ -76,7 +77,11 @@ function PureResearches() {
   // end of targetted Article data
 
   useEffect(() => {
-    setData(AppCtx.rArticles.filter((article) => !article.is_draft));
+    setData(
+      AppCtx.rArticles.filter(
+        (article) => !article.is_draft && !article.get_is_published
+      )
+    );
   }, [AppCtx.rArticles.length, AppCtx.articleUpdated]);
 
   const searchHandler = (text) => {
@@ -99,6 +104,83 @@ function PureResearches() {
     // set the data passed to the table
     setData(result);
   };
+
+  function PublishPostHandler() {
+    if (title.trim().length === 0 || content.trim().length === 0) {
+      return alert("We dont accept empy fields");
+    }
+
+    // otherwiser we're good to go..
+    setShowAnimation(true);
+    setFormSubmitLoader(true);
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("category", category);
+    formData.append("content", content);
+    formData.append("post_id", targettedArticle.id);
+    formData.append("trimmed_media", JSON.stringify(trimmedServerMedia));
+    formData.append("user_id", AppCtx.usermetadata.get_user_id);
+
+    let counter = 0;
+    mediaFiles.forEach((file) => {
+      if (file.payload.source === "server") {
+        return;
+      }
+      let uri_splited = file.payload.uri.split(".");
+      let file_type = uri_splited[uri_splited.length - 1];
+      let content = file.payload.uri;
+
+      if (Platform.OS === "ios") {
+        const fieldname = counter === 0 ? "media" : `media${counter}`;
+        formData.append(fieldname, {
+          uri: content,
+          name: file.payload.name,
+          type: file_type,
+        });
+      } else if (Platform.OS === "android") {
+        const fieldname = counter === 0 ? "media" : `media${counter}`;
+        let uri = file.payload.uri;
+        if (uri[0] === "/") {
+          uri = `file://${uri}`;
+          uri = uri.replace(/%/g, "%25");
+        }
+        let filetype = file.payload.name.split(".");
+        filetype = filetype[filetype.length - 1];
+        formData.append(fieldname, {
+          uri: uri,
+          name: file.payload.name,
+          type: `application/${filetype}`,
+        });
+      }
+      counter++;
+      // post multiple files https://stackoverflow.com/questions/12989442/uploading-multiple-files-using-formdata#:~:text=If%20you%20call%20data.,it%20does%20not%20already%20exist.
+    });
+    formData.append("total_media", `media${counter}`);
+    PublishArticle(formData, {
+      "Content-Type": "multipart/form-data",
+    })
+      .then((result) => {
+        console.log("result ", result);
+        setIcon("check");
+        AppCtx.manipulateRArticles(result);
+        AppCtx.incrementArticleUpdated();
+        setMessage("Success");
+        setShowAnimation(false);
+        setTimeout(() => {
+          setFormSubmitLoader(false);
+          bottomSheetRef.current.snapToIndex(0);
+          // navigation.navigate("OfficerDashboard");
+        }, 1000);
+      })
+      .catch((err) => {
+        setIcon("close");
+        setMessage("Failed");
+        setShowAnimation(false);
+        setTimeout(() => {
+          setFormSubmitLoader(false);
+        }, 1000);
+      });
+  }
 
   const onTapArticleHandler = (article) => {
     setDisplayArticleDetails(true);
@@ -351,6 +433,7 @@ function PureResearches() {
         )}
       </LinearGradient>
       <BottomSheet
+        pointerEvents={formSubmitLoader ? "none" : "auto"}
         ref={bottomSheetRef}
         index={-1}
         enablePanDownToClose={true}
@@ -1000,7 +1083,7 @@ function PureResearches() {
                       }}
                     >
                       <Button
-                        // onPress={submitDataHandler}
+                        onPress={PublishPostHandler}
                         mode="contained"
                         style={{
                           width: "48%",
@@ -1029,7 +1112,7 @@ function PureResearches() {
                   </KeyboardAvoidingView>
                   <View
                     style={{
-                      height: 150,
+                      height: 500,
                     }}
                   ></View>
                 </ScrollView>

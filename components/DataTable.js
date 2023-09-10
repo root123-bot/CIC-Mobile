@@ -5,6 +5,7 @@ import { CustomLine } from "./Ui";
 import { COLORS } from "../constants/colors";
 
 function DataTable({ data }) {
+  console.log("Data ", data);
   const navigation = useNavigation();
 
   return (
@@ -19,12 +20,14 @@ function DataTable({ data }) {
           )}
           {/* title */}
           {data
-            .map((val) => ({
-              title: val.title,
-              id: val.id,
-              isDrafted: val.is_draft,
-              isPublished: val.get_is_published,
-            }))
+            .map((val) => {
+              return {
+                title: val.title,
+                id: val.id,
+                isDrafted: val.is_draft,
+                isPublished: val.get_is_published,
+              };
+            })
             .map((value, index) => (
               <View key={`${index * Math.random()}.FO`}>
                 <TouchableOpacity

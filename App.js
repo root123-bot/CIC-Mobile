@@ -416,7 +416,11 @@ const renderTabBar2 = (layout, props) => {
                   fontFamily: "montserrat-17",
                 }}
               >
-                {AppCtx.rArticles.filter((article) => !article.is_draft).length}
+                {
+                  AppCtx.rArticles.filter(
+                    (article) => !article.is_draft && !article.get_is_published
+                  ).length
+                }
               </Text>
             </View>
           );
@@ -446,7 +450,9 @@ const renderTabBar2 = (layout, props) => {
               >
                 {
                   AppCtx.rArticles
-                    .filter((article) => article.is_draft)
+                    .filter(
+                      (article) => article.is_draft && !article.get_is_published
+                    )
                     .filter(
                       (val) =>
                         +val.drafted_by === +AppCtx.usermetadata.get_user_id
@@ -527,7 +533,11 @@ const renderTabBar = (layout, props) => {
                   fontFamily: "montserrat-17",
                 }}
               >
-                {AppCtx.rArticles.length}
+                {
+                  AppCtx.rArticles.filter(
+                    (article) => !article.get_is_published
+                  ).length
+                }
               </Text>
             </View>
           );

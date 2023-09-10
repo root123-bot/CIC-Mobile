@@ -1,11 +1,10 @@
-import React, { memo } from "react";
 import { Text, View, StyleSheet, Platform } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { CustomLine } from "./Ui";
 import { COLORS } from "../constants/colors";
 
-function DataTable2({ data }) {
+function DataTable2({ data, onTapHandler }) {
   const navigation = useNavigation();
 
   return (
@@ -21,33 +20,30 @@ function DataTable2({ data }) {
           {/* title */}
           {data
             .map((val) => ({ title: val.title, id: val.id }))
-            .map((value, index) => (
-              <View key={`${index * Math.random()}.FO`}>
-                <TouchableOpacity
-                  onPress={() => {
-                    console.log("Article id ", value.id);
-                    navigation.navigate("UpdateArticle", {
-                      articleId: value.id,
-                    });
-                  }}
-                  style={{ paddingVertical: 5 }}
-                >
-                  <View style={[styles.columnHolder]}>
-                    <Text numberOfLines={1} style={styles.colValue}>
-                      {value.title}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-                {Platform.OS === "ios" && (
-                  <CustomLine color={COLORS.thirdary} style={styles.hr} />
-                )}
-              </View>
-            ))}
+            .map((value, index) => {
+              return (
+                <View key={`${index * Math.random()}.FO`}>
+                  <TouchableOpacity
+                    onPress={onTapHandler.bind(this, value.id)}
+                    style={{ paddingVertical: 5 }}
+                  >
+                    <View style={[styles.columnHolder]}>
+                      <Text numberOfLines={1} style={styles.colValue}>
+                        {value.title}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                  {Platform.OS === "ios" && (
+                    <CustomLine color={COLORS.thirdary} style={styles.hr} />
+                  )}
+                </View>
+              );
+            })}
         </View>
         <View style={[styles.innerContainer, { width: "37%" }]}>
           <View>
             <Text style={styles.header} numberOfLines={1}>
-              Is Published
+              Researcher
             </Text>
           </View>
           {Platform.OS === "ios" && (
@@ -56,16 +52,13 @@ function DataTable2({ data }) {
 
           {/* is published */}
           {data
-            .map((val) => val.title)
+            .map((val) => val.get_researcher.username)
             .map((value, index) => (
               <View key={`${index * Math.random()}.FO`}>
                 <TouchableOpacity style={{ paddingVertical: 5 }}>
                   <View style={[styles.columnHolder]}>
-                    <Text
-                      numberOfLines={1}
-                      style={[styles.colValue, { textAlign: "center" }]}
-                    >
-                      {"No"}
+                    <Text numberOfLines={1} style={[styles.colValue]}>
+                      {value}
                     </Text>
                   </View>
                 </TouchableOpacity>
@@ -78,7 +71,7 @@ function DataTable2({ data }) {
         <View style={[styles.innerContainer, { width: "26%" }]}>
           <View>
             <Text numberOfLines={1} style={styles.header}>
-              Date
+              Date Updated
             </Text>
           </View>
           {Platform.OS === "ios" && (
@@ -87,7 +80,11 @@ function DataTable2({ data }) {
 
           {/* my date data */}
           {data
-            .map((val) => ({ date_posted: val.date_posted, id: val.id }))
+            .map((val) => ({
+              date_posted: val.date_posted,
+              id: val.id,
+              date_updated: val.date_updated,
+            }))
             .map((value, index) => (
               <View key={`${index * Math.random()}.FO`}>
                 <TouchableOpacity
@@ -101,7 +98,7 @@ function DataTable2({ data }) {
                 >
                   <View style={[styles.columnHolder]}>
                     <Text numberOfLines={1} style={styles.colValue}>
-                      {`${value.date_posted
+                      {`${value.date_updated
                         .split("T")[0]
                         .split("-")
                         .reverse()
@@ -120,7 +117,7 @@ function DataTable2({ data }) {
   );
 }
 
-export default memo(DataTable2);
+export default DataTable2;
 
 const styles = StyleSheet.create({
   hr: {

@@ -52,7 +52,7 @@ function SetLoginPin({ navigation, route }) {
             },
           });
           AppCtx.logout();
-          alert("Your account have been deleted, register again.");
+          alert("Session expired, login again");
         } else {
           alert(err.message);
         }

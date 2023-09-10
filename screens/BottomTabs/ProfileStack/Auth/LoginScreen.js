@@ -18,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function LoginScreen({ route, navigation }) {
   const AppCtx = useContext(AppContext);
+  console.log("this is the route ", route.params);
   const { next } = route.params?.next ? route.params : { next: "Profile" };
 
   const phoneInput = useRef(null);
@@ -134,6 +135,9 @@ function LoginScreen({ route, navigation }) {
               navigation.navigate("Home", {
                 screen: "ConfirmOrder",
               });
+            } else if (next === "Home") {
+              // we have this if we've some redirect following action requires user to login
+              navigation.navigate("HomeScreen");
             }
           }, 1000);
         } else {

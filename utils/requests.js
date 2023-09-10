@@ -196,17 +196,28 @@ export const CreateArticleHandler = async (fdata, headers) => {
   })
     .then((response) => {
       if (response.status === 200) {
+        console.log("im him 200 STATUS");
         return response.json();
       } else if (response.status === 406) {
+        console.log("iM 406 ERROR");
         throw new Error(`We don't accept this usergroup`);
       } else {
+        console.log("iM 500 ERROR");
+        console.log("response ", response.status);
         response.json().then((output) => {
+          console.log("This is output ", output);
           throw new Error(output.details);
         });
       }
     })
-    .then((data) => Promise.resolve(data))
-    .catch((error) => Promise.reject(error));
+    .then((data) => {
+      console.log("What happened ", data);
+      return Promise.resolve(data);
+    })
+    .catch((error) => {
+      console.log("WE HAVE ERROR IN CREATING ARTICLE ", error.message);
+      return Promise.reject(error);
+    });
 };
 
 export const UpdateArticle = async (fdata, headers) => {
@@ -250,6 +261,53 @@ export const DraftArticle = async (fdata, headers) => {
       }
     })
     .then((data) => Promise.resolve(data))
+    .catch((error) => Promise.reject(error));
+};
+
+export const UpdatePostArticle = async (fdata, headers) => {
+  console.log("someone call me ");
+  return fetch(`${BASE_URL}/api/updatepost/`, {
+    method: "POST",
+    body: fdata,
+    headers: headers,
+  })
+    .then((response) => {
+      if (response.status === 200) {
+        return response.json();
+      } else if (response.status === 406) {
+        throw new Error(`We don't accept this usergroup`);
+      } else {
+        response.json().then((output) => {
+          throw new Error(output.details);
+        });
+      }
+    })
+    .then((data) => Promise.resolve(data))
+    .catch((error) => Promise.reject(error));
+};
+
+export const PublishArticle = async (fdata, headers) => {
+  console.log("someone call me ");
+  return fetch(`${BASE_URL}/api/publish/`, {
+    method: "POST",
+    body: fdata,
+    headers: headers,
+  })
+    .then((response) => {
+      if (response.status === 200) {
+        return response.json();
+      } else if (response.status === 406) {
+        throw new Error(`We don't accept this usergroup`);
+      } else {
+        response.json().then((output) => {
+          throw new Error(output.details);
+        });
+      }
+    })
+    .then((data) => {
+      console.log("This is data ", data);
+      return Promise.resolve(data);
+    })
     .catch((error) => Promise.reject(error));
 };
 
