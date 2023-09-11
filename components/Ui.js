@@ -27,6 +27,10 @@ import * as ImageCache from "react-native-expo-image-cache";
 import { AppContext } from "../store/context";
 import { useNavigation } from "@react-navigation/native";
 import { LikePost, UnlikePost } from "../utils/requests";
+import Carousel from "react-native-snap-carousel";
+import { SliderBox } from "react-native-image-slider-box";
+import { Audio } from "expo-av";
+
 export const NavBar = () => {
   return (
     <View>
@@ -125,15 +129,34 @@ export const Post = ({
 }) => {
   const AppCtx = useContext(AppContext);
   const navigation = useNavigation();
-  console.log(
-    "THIS IS PHOTO PATH ",
-    metadata.posted_media.find(
+
+  const images = metadata.posted_media
+    .filter(
       (value) =>
         value.path.includes(".jpg") ||
         value.path.includes(".png") ||
         value.path.includes(".jpeg")
-    ).path
-  );
+    )
+    .map((value) => `${BASE_URL}${value.path}`);
+
+  const audios = metadata.posted_media
+    .filter(
+      (value) => value.path.includes(".mp3") || value.path.includes(".wav")
+    )
+    .map((value) => `${BASE_URL}${value.path}`);
+
+  const videos = metadata.posted_media
+    .filter(
+      (value) =>
+        value.path.includes(".mp4") ||
+        value.path.includes(".avi") ||
+        value.path.includes(".mov")
+    )
+    .map((value) => `${BASE_URL}${value.path}`);
+
+  const pdfs = metadata.posted_media
+    .filter((value) => value.path.includes(".pdf"))
+    .map((value) => `${BASE_URL}${value.path}`);
 
   const [icon, setIcon] = useState(
     metadata.get_likes.likes.find(
@@ -143,8 +166,9 @@ export const Post = ({
       : "hearto"
   );
   const [articleLiked, setArticleLiked] = useState(0);
-  //
+  const [sound, setSound] = useState();
   const [likes, setLikes] = useState(metadata.get_likes.total);
+  const [loading, setLoading] = useState(false);
   const likePostHandler = async (post) => {
     console.log("post ", post);
     console.log("Im the one executed ", AppCtx.isAunthenticated);
@@ -220,9 +244,18 @@ export const Post = ({
     }
   };
 
-  // useEffect(() => {
-  //   metadata.get_likes.total + 1;
-  // }, [articleLiked]);
+  async function playSound(audiourl) {
+    setLoading(true);
+
+    const { sound } = await Audio.Sound();
+
+    await sound.loadAsync({
+      uri: audiourl,
+    });
+
+    await sound.playAsync();
+    setLoading(false);
+  }
 
   return (
     <View>
@@ -330,7 +363,7 @@ export const Post = ({
             {metadata.content}
           </Text>
           <View style={{ marginVertical: 10 }}>
-            <ImageCache.Image
+            {/* <ImageCache.Image
               {...{
                 preview: {
                   uri: `${BASE_URL}${
@@ -356,16 +389,9 @@ export const Post = ({
                 height: 200,
                 borderRadius: 15,
               }}
-              imageStyle={
-                {
-                  // width: 38,
-                  // height: 38,
-                  // opacity: 0.15,
-                  // flex: 1,
-                  // borderRadius: 17.5,
-                }
-              }
-            />
+            /> */}
+
+            <SliderBox images={images} />
           </View>
         </Pressable>
         {/* like and comments number */}

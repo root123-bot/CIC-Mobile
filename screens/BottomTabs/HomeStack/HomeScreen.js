@@ -7,7 +7,14 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import { View, SafeAreaView, Image, Text, ScrollView } from "react-native";
+import {
+  View,
+  SafeAreaView,
+  Image,
+  Text,
+  Dimensions,
+  ScrollView,
+} from "react-native";
 import {
   AboutCard,
   CustomLine,
@@ -21,6 +28,8 @@ import { AppContext } from "../../../store/context";
 import Animated, { FadeInUp, FadeOutUp } from "react-native-reanimated";
 import { CommentPost, ResearcherArticlesList } from "../../../utils/requests";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+
+const width = Dimensions.get("window").width;
 
 function HomeScreen() {
   const AppCtx = useContext(AppContext);
