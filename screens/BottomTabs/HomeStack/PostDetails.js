@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useCallback,
   useRef,
+  useEffect,
 } from "react";
 import {
   View,
@@ -24,7 +25,7 @@ import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
 import { AppContext } from "../../../store/context";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Button, TextInput } from "react-native-paper";
-import { CommentPost } from "../../../utils/requests";
+import { CommentPost, LikePost, UnlikePost } from "../../../utils/requests";
 
 const width = Dimensions.get("window").width;
 
@@ -101,6 +102,14 @@ function PostDetails({ navigation, route }) {
   const [loading, setLoading] = useState(false);
   const [activeArticle, setActiveArticle] = useState(metadata);
 
+  useEffect(() => {
+    console.log("I suspect changes");
+    const activeArticle = AppCtx.rArticles.find(
+      (rarticles) => rarticles.id === metadata.id
+    );
+    setActiveArticle(activeArticle);
+  }, [AppCtx.rArticles.length, AppCtx.articleUpdated]);
+
   function submitCommentHandler() {
     console.log("Active article ", activeArticle);
 
@@ -109,7 +118,55 @@ function PostDetails({ navigation, route }) {
     bottomSheetRef.current.snapToIndex(0);
 
     CommentPost(activeArticle.id, AppCtx.usermetadata.get_user_id, comment);
+    AppCtx.incrementArticleUpdated();
   }
+
+  const likePostHandler = async () => {
+    if (!AppCtx.isAunthenticated) {
+      Alert.alert(
+        "Login is Required?",
+        "To trigger this action you should register/login.",
+        [
+          {
+            text: "Cancel",
+          },
+          {
+            text: "Continue",
+            style: "destructive",
+            onPress: () => {
+              navigation.navigate("ProfileStack", {
+                screen: "LoginScreen",
+                params: {
+                  next: "Home",
+                },
+              });
+            },
+          },
+        ]
+      );
+    } else {
+      // by checking on "hearto" and "heart" we'll make sure the user does not like the same post twice
+      // its important to call the likeRArticle function so as to update our context
+      if (icon === "hearto") {
+        console.log("I need to like post");
+        AppCtx.likeRArticle(activeArticle);
+        setLikes(likes + 1);
+        setIcon("heart");
+
+        LikePost(activeArticle.id, AppCtx.usermetadata.get_user_id);
+        AppCtx.incrementArticleUpdated();
+      } else {
+        console.log("I need to unlike post");
+        setLikes(likes > 0 ? likes - 1 : 0);
+        AppCtx.unlikeRArticle(activeArticle);
+        setIcon("hearto");
+
+        // unlike act on server
+        UnlikePost(activeArticle.id, AppCtx.usermetadata.get_user_id);
+        AppCtx.incrementArticleUpdated();
+      }
+    }
+  };
 
   function viewCommentHandler() {
     bottomSheetRef1.current.snapToIndex(1);
@@ -264,7 +321,7 @@ function PostDetails({ navigation, route }) {
                   fontSize: 16,
                 }}
               >
-                {`${metadata.get_comments.total} Comments`}
+                {`${activeArticle.get_comments.total} Comments`}
               </Text>
             </TouchableOpacity>
           </View>
@@ -284,7 +341,7 @@ function PostDetails({ navigation, route }) {
                 justifyContent: "center",
                 alignItems: Platform.OS === "ios" ? "flex-start" : "center",
               }}
-              // onPress={likePostHandler.bind(this, metadata)}
+              onPress={likePostHandler}
             >
               <AntDesign name={icon} size={20} color={COLORS.primary} />
               <Text
@@ -431,13 +488,12 @@ function PostDetails({ navigation, route }) {
             {
               // check if the article has comments
               activeArticle &&
-              AppCtx.rArticles.find(
-                (rarticles) => rarticles.id === activeArticle.id
-              ).get_comments.comments.length > 0 ? (
+              AppCtx.rArticles.find((rarticles) => {
+                return rarticles.id === activeArticle.id;
+              }).get_comments.comments.length > 0 ? (
                 activeArticle.get_comments.comments
                   .reverse()
                   .map((comment, index) => {
-                    console.log("This is the comment ", comment.comment);
                     return (
                       <View key={index}>
                         <View
