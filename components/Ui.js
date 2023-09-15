@@ -13,6 +13,7 @@ import {
   Image,
   ImageBackground,
   TouchableOpacity,
+  StyleSheet,
   Pressable,
   Platform,
   Alert,
@@ -30,6 +31,7 @@ import { LikePost, UnlikePost } from "../utils/requests";
 import Carousel from "react-native-snap-carousel";
 import { SliderBox } from "react-native-image-slider-box";
 import { Audio } from "expo-av";
+import { ScrollView } from "react-native-gesture-handler";
 
 export const NavBar = () => {
   return (
@@ -165,6 +167,7 @@ export const Post = ({
       ? "heart"
       : "hearto"
   );
+  const [imageActive, setImageActive] = useState(0);
   const [articleLiked, setArticleLiked] = useState(0);
   const [sound, setSound] = useState();
   const [likes, setLikes] = useState(metadata.get_likes.total);
@@ -257,14 +260,31 @@ export const Post = ({
     setLoading(false);
   }
 
+  const onchange = (nativeEvent) => {
+    if (nativeEvent) {
+      const slide = Math.ceil(
+        nativeEvent.contentOffset.x / nativeEvent.layoutMeasurement.width
+      );
+
+      if (slide != imageActive) {
+        setImageActive(slide);
+      }
+    }
+  };
+
   return (
-    <View>
+    <View
+      style={{
+        flex: 1,
+      }}
+    >
       <View
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
           marginVertical: 15,
+          flex: 1,
         }}
       >
         <View
@@ -273,14 +293,6 @@ export const Post = ({
             alignItems: "center",
           }}
         >
-          {/* <Image
-            source={require("../assets/images/human.png")}
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: 17.5,
-            }}
-          /> */}
           <ImageCache.Image
             {...{
               preview: {
@@ -345,13 +357,20 @@ export const Post = ({
       <View
         style={{
           marginVertical: 7,
+          flex: 1,
         }}
       >
         <Pressable
+          style={{
+            flex: 1,
+          }}
           onPress={() =>
-            console.log(
-              "I need to display a full post, i think i should be another screen embeded in this homestack but i dont need it to be in presentaion mode..."
-            )
+            navigation.navigate("HomeStack", {
+              screen: "PostDetails",
+              params: {
+                post: metadata,
+              },
+            })
           }
         >
           <Text
@@ -362,39 +381,27 @@ export const Post = ({
           >
             {metadata.content}
           </Text>
-          <View style={{ marginVertical: 10 }}>
-            {/* <ImageCache.Image
-              {...{
-                preview: {
-                  uri: `${BASE_URL}${
-                    metadata.posted_media.find(
-                      (value) =>
-                        value.path.includes(".jpg") ||
-                        value.path.includes(".png") ||
-                        value.path.includes(".jpeg")
-                    ).path
-                  }`,
-                },
-                uri: `${BASE_URL}${
-                  metadata.posted_media.find(
-                    (value) =>
-                      value.path.includes(".jpg") ||
-                      value.path.includes(".png") ||
-                      value.path.includes(".jpeg")
-                  ).path
-                }`,
-              }}
-              style={{
-                width: "100%",
-                height: 200,
-                borderRadius: 15,
-              }}
-            /> */}
-
-            <SliderBox images={images} />
+          <View
+            style={{
+              marginVertical: 15,
+            }}
+          >
+            <SliderBox
+              dotColor={COLORS.primary}
+              inactiveDotColor="grey"
+              imageLoadingColor="grey"
+              images={images}
+              onCurrentImagePressed={() =>
+                navigation.navigate("HomeStack", {
+                  screen: "PostDetails",
+                  params: {
+                    post: metadata,
+                  },
+                })
+              }
+            />
           </View>
         </Pressable>
-        {/* like and comments number */}
         <View
           style={{
             flexDirection: "row",
@@ -438,10 +445,7 @@ export const Post = ({
             </Text>
           </TouchableOpacity>
         </View>
-        {/* like, commment, and share, lets use "grey" color for all icons and text in this box, but what i want to tell you 
-                if that for like if someone like the post we should change fill heart with grey color to indicate that we have liked 
-                the post, for design purpose i don't think we should need to use the dark grey color because we've already used it in
-                above section to show how many comments and likes for that post.. */}
+
         <View
           style={{
             flexDirection: "row",
@@ -596,3 +600,24 @@ export const Background = ({ children, image, style }) => {
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  wrap: {
+    width: "100%",
+    height: 200,
+  },
+  wrapDot: {
+    position: "absolute",
+    bottom: 0,
+    flexDirection: "row",
+    alignSelf: "center",
+  },
+  dotActive: {
+    margin: 3,
+    color: "black",
+  },
+  dot: {
+    margin: 3,
+    color: "#888",
+  },
+});

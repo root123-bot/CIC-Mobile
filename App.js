@@ -54,6 +54,8 @@ import CreateArticle from "./screens/Researcher/CreateArticle";
 import ViewEditArticle from "./screens/Researcher/ViewEditArticle";
 import Pure from "./screens/OfficerTopTabs/Reseaches/TopTabs/Pure";
 import Draft from "./screens/OfficerTopTabs/Reseaches/TopTabs/Draft";
+import IntroScreen from "./screens/OuterStack";
+import PostDetails from "./screens/BottomTabs/HomeStack/PostDetails";
 
 const Stack = createNativeStackNavigator();
 const Stack1 = createStackNavigator();
@@ -221,16 +223,54 @@ function ResearcherStack({ navigation }) {
   );
 }
 
-// home stack
-function HomeStack() {
+function OuterAunthenticationStack() {
   return (
-    <Stack1.Navigator
+    <Stack.Navigator
       screenOptions={{
         headerShown: false,
       }}
     >
-      <Stack1.Screen name="HomeScreen" component={HomeScreen} />
-    </Stack1.Navigator>
+      <Stack.Screen name="IntroScreen" component={IntroScreen} />
+      <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
+      <Stack.Screen name="LoginScreen" component={LoginScreen} />
+      <Stack.Screen name="VerifyOTPScreen" component={EnterOTPScreen} />
+      <Stack.Screen name="SetPinScreen" component={SetPinScreen} />
+    </Stack.Navigator>
+  );
+}
+
+// home stack
+function HomeStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="HomeScreen" component={HomeScreen} />
+      <Stack.Screen
+        options={({ navigation }) => ({
+          headerShown: true,
+          title: "PostDetail",
+          headerTintColor: COLORS.primary,
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate("HomeScreen")}>
+              <Text
+                style={{
+                  fontFamily: "montserrat-17",
+                  marginLeft: 10,
+                  color: COLORS.primary,
+                }}
+              >
+                Cancel
+              </Text>
+            </TouchableOpacity>
+          ),
+        })}
+        name="PostDetails"
+        component={PostDetails}
+      />
+    </Stack.Navigator>
   );
 }
 
@@ -559,8 +599,8 @@ function MyTabs() {
       }}
     >
       <Tab.Screen
-        options={{
-          headerShown: true,
+        options={({ navigation, route }) => ({
+          headerShown: false,
           headerTitleAlign: "left",
           headerTintColor: COLORS.primary,
           headerStyle: {
@@ -568,25 +608,26 @@ function MyTabs() {
             borderBottomWidth: 0.4,
             borderBottomColor: "grey",
           },
-          headerRight: () => (
-            <TouchableOpacity
-              style={{
-                marginRight: 15,
-              }}
-            >
-              <Ionicons
-                name="notifications-outline"
-                size={25}
-                color={COLORS.forthy}
-              />
-            </TouchableOpacity>
-          ),
+          // headerRight: () => (
+          //   <TouchableOpacity
+          //     style={{
+          //       marginRight: 15,
+          //     }}
+          //     onPress={() => navigation.navigate("Notifications")}
+          //   >
+          //     <Ionicons
+          //       name="notifications-outline"
+          //       size={25}
+          //       color={COLORS.forthy}
+          //     />
+          //   </TouchableOpacity>
+          // ),
 
           title: "Home",
           tabBarIcon: ({ focused, size, color }) => (
             <TabIcon size={size} color={color} name="home" focused={focused} />
           ),
-        }}
+        })}
         name="HomeStack"
         component={HomeStack}
       />
@@ -659,6 +700,7 @@ function MyTabs() {
 }
 
 function Navigation() {
+  const AppCtx = useContext(AppContext);
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -666,6 +708,13 @@ function Navigation() {
           headerShown: false,
         }}
       >
+        {/* {!AppCtx.isAunthenticated && (
+          <Stack.Screen
+            name="IntroSetup"
+            component={OuterAunthenticationStack}
+          />
+        )} */}
+
         <Stack.Screen name="MyTabs" component={MyTabs} />
       </Stack.Navigator>
     </NavigationContainer>
