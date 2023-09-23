@@ -16,6 +16,7 @@ export const AppContext = createContext({
   rArticles: [],
   officerposts: [],
   articleUpdated: 0,
+  activeFilter: "all",
   logout: () => {},
   manipulateUserMetadata: (metadata) => {},
   manipulateIsAunthenticated: (status) => {},
@@ -37,6 +38,7 @@ export const AppContext = createContext({
   likeRArticle: (article) => {},
   unlikeRArticle: (article) => {},
   commentArticle: (metadata) => {},
+  manipulateActiveFilter: (filter) => {},
 });
 
 function AppContextProvider({ children }) {
@@ -50,6 +52,7 @@ function AppContextProvider({ children }) {
   const [lastLoginPhoneNumber, setLastLoginPhoneNumber] = useState(null);
   const [stillExecutingUserMetadata, setStillExecutingUserMetadata] =
     useState(true);
+  const [activeFilter, setActiveFilter] = useState("all");
   const [isSettingInactive, setIsSettingInactive] = useState(false);
   const [userrawpost, setUserRawPost] = useState([]);
   const [articleUpdated, setArticleUpdated] = useState(0);
@@ -77,6 +80,10 @@ function AppContextProvider({ children }) {
     setOfficerPosts((prevState) => {
       return [post, ...prevState];
     });
+  }
+
+  function manipulateActiveFilter(filter) {
+    setActiveFilter(filter);
   }
 
   function incrementArticleUpdated() {
@@ -339,6 +346,7 @@ function AppContextProvider({ children }) {
     rArticles,
     officerposts,
     articleUpdated,
+    activeFilter,
     logout,
     manipulateIsAunthenticated,
     manipulateUserMetadata,
@@ -359,6 +367,7 @@ function AppContextProvider({ children }) {
     likeRArticle,
     unlikeRArticle,
     commentArticle,
+    manipulateActiveFilter,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -56,6 +56,8 @@ import Pure from "./screens/OfficerTopTabs/Reseaches/TopTabs/Pure";
 import Draft from "./screens/OfficerTopTabs/Reseaches/TopTabs/Draft";
 import IntroScreen from "./screens/OuterStack";
 import PostDetails from "./screens/BottomTabs/HomeStack/PostDetails";
+import Login from "./screens/Intro/LoginScreen";
+import Register from "./screens/Intro/RegisterScreen";
 
 const Stack = createNativeStackNavigator();
 const Stack1 = createStackNavigator();
@@ -230,9 +232,9 @@ function OuterAunthenticationStack() {
         headerShown: false,
       }}
     >
-      <Stack.Screen name="IntroScreen" component={IntroScreen} />
-      <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
+      {/* <Stack.Screen name="IntroScreen" component={IntroScreen} /> */}
       <Stack.Screen name="LoginScreen" component={LoginScreen} />
+      <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
       <Stack.Screen name="VerifyOTPScreen" component={EnterOTPScreen} />
       <Stack.Screen name="SetPinScreen" component={SetPinScreen} />
     </Stack.Navigator>
@@ -285,14 +287,14 @@ function ProfileStack() {
     >
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
 
-      {!AppCtx.isAunthenticated && (
+      {/* {!AppCtx.isAunthenticated && (
         <>
           <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
           <Stack.Screen name="LoginScreen" component={LoginScreen} />
           <Stack.Screen name="VerifyOTPScreen" component={EnterOTPScreen} />
           <Stack.Screen name="SetPinScreen" component={SetPinScreen} />
         </>
-      )}
+      )} */}
 
       {AppCtx.isAunthenticated && (
         <>
@@ -708,12 +710,12 @@ function Navigation() {
           headerShown: false,
         }}
       >
-        {/* {!AppCtx.isAunthenticated && (
+        {!AppCtx.isAunthenticated && (
           <Stack.Screen
             name="IntroSetup"
             component={OuterAunthenticationStack}
           />
-        )} */}
+        )}
 
         <Stack.Screen name="MyTabs" component={MyTabs} />
       </Stack.Navigator>

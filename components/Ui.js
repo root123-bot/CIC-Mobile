@@ -4,6 +4,8 @@ import {
   FontAwesome,
   FontAwesome5,
   Ionicons,
+  MaterialCommunityIcons,
+  Octicons,
 } from "@expo/vector-icons";
 import React, { useEffect, useRef, useContext, useState } from "react";
 import {
@@ -172,6 +174,7 @@ export const Post = ({
   const [sound, setSound] = useState();
   const [likes, setLikes] = useState(metadata.get_likes.total);
   const [loading, setLoading] = useState(false);
+
   const likePostHandler = async (post) => {
     console.log("post ", post);
     console.log("Im the one executed ", AppCtx.isAunthenticated);

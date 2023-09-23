@@ -1,7 +1,14 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import React, { memo, useContext, useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Platform,
+} from "react-native";
 import { COLORS } from "../constants/colors";
 import { CustomLine } from "./Ui";
 import { TransparentPopUpIconMessage } from "./Messages";
@@ -110,40 +117,42 @@ function TransparentBackgroundButton({ title, subtitle, icon, color }) {
           </View>
         </TouchableOpacity>
         <CustomLine color={"grey"} style={styles.customLine} />
-        <TouchableOpacity
-          onPress={() => {
-            Alert.alert(
-              "Are you sure?",
-              "Are you sure you want to delete account, the process is irreversible.",
-              [
-                {
-                  text: "Cancel",
-                  onPress: () => {
-                    console.log("Hello world");
+        {Platform.OS === "ios" && (
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert(
+                "Are you sure?",
+                "Are you sure you want to delete account, the process is irreversible.",
+                [
+                  {
+                    text: "Cancel",
+                    onPress: () => {
+                      console.log("Hello world");
+                    },
                   },
-                },
-                {
-                  text: "Delete",
-                  style: "destructive",
-                  onPress: () => {
-                    // deleteAccountHandler();
+                  {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: () => {
+                      // deleteAccountHandler();
+                    },
                   },
-                },
-              ]
-            );
-          }}
-        >
-          <View style={styles.itemContainer}>
-            <View style={styles.iconHolder}>
-              <MaterialIcons name="delete" size={30} color={"red"} />
+                ]
+              );
+            }}
+          >
+            <View style={styles.itemContainer}>
+              <View style={styles.iconHolder}>
+                <MaterialIcons name="delete" size={30} color={"red"} />
+              </View>
+              <View>
+                <Text style={[styles.title, { color: "red" }]}>
+                  Delete Account
+                </Text>
+              </View>
             </View>
-            <View>
-              <Text style={[styles.title, { color: "red" }]}>
-                Delete Account
-              </Text>
-            </View>
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );

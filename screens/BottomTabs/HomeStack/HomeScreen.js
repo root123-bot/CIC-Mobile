@@ -14,6 +14,7 @@ import {
   Text,
   Dimensions,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import {
   AboutCard,
@@ -28,6 +29,9 @@ import { AppContext } from "../../../store/context";
 import Animated, { FadeInUp, FadeOutUp } from "react-native-reanimated";
 import { CommentPost, ResearcherArticlesList } from "../../../utils/requests";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
+import { TransparentPopUpIconMessage } from "../../../components/Messages";
+import { Animation } from "../../../components/Ui";
 
 const width = Dimensions.get("window").width;
 
@@ -63,6 +67,15 @@ function HomeScreen() {
   const [stillFetching, setStillFetching] = useState(false);
   const [comment, setComment] = useState("");
   const [activeArticle, setActiveArticle] = useState(null);
+  const [showAnimation, setShowAnimation] = useState(false);
+  const [formSubmitLoader, setFormSubmitLoader] = useState(false);
+  const [message, setMessage] = useState("");
+  const [icon, setIcon] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [articles, setArticles] = useState(
+    AppCtx.rArticles.filter((article) => article.get_is_published)
+  );
+
   const fechResearcherList = async () => {
     try {
       setStillFetching(true);
@@ -126,7 +139,209 @@ function HomeScreen() {
             />
           </Animated.View>
         )}
+        <View
+          style={{
+            marginVertical: 10,
+            position: "relative",
+          }}
+        >
+          <View
+            style={{
+              display: formSubmitLoader ? "flex" : "none",
+              position: "absolute",
+              top: "40%",
+              zIndex: 10000000000,
+              alignSelf: "center",
+              width: 150,
+              height: 150,
+              justifyContent: "center",
+            }}
+          >
+            <TransparentPopUpIconMessage
+              messageHeader={message}
+              icon={icon}
+              inProcess={showAnimation}
+            />
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <TouchableOpacity
+              onPress={() => {
+                AppCtx.manipulateActiveFilter("All");
+                // then we'll use this filter..
+                // setShowAnimation(true);
+                // setFormSubmitLoader(true);
+                // setMessage("Fetching");
+                // setIcon("search");
+                // fetchVibanda();
+                // setVibanda(initialVibanda);
+                setTimeout(() => {
+                  setShowAnimation(false);
+                  setFormSubmitLoader(false);
+                  setMessage("");
+                  setIcon("");
+                }, 1000);
+              }}
+              style={{
+                marginRight: 10,
+                flexDirection: "row",
+                alignItems: "center",
+                borderColor: "grey",
+                borderWidth: 1,
+                padding: 6,
+                backgroundColor:
+                  AppCtx.activeFilter.toLowerCase() === "All".toLowerCase()
+                    ? "grey"
+                    : "transparent",
+              }}
+            >
+              <Octicons
+                name={"dot-fill"}
+                size={14}
+                color={
+                  AppCtx.activeFilter.toLowerCase() === "All".toLowerCase()
+                    ? "white"
+                    : "grey"
+                }
+              />
+              <Text
+                style={{
+                  color:
+                    AppCtx.activeFilter.toLowerCase() === "All".toLowerCase()
+                      ? "white"
+                      : "grey",
+                  marginLeft: 4,
+                  fontFamily: "montserrat-17",
+                }}
+              >
+                All
+              </Text>
+            </TouchableOpacity>
 
+            <TouchableOpacity
+              onPress={() => {
+                AppCtx.manipulateActiveFilter("Kilimo");
+                // then we'll use this filter..
+                // setShowAnimation(true);
+                // setFormSubmitLoader(true);
+                // setMessage("Fetching");
+                // setIcon("search");
+
+                // filter vibanda which only opened
+                // const openedVibanda = initialVibanda.filter((metadata) => {
+                //   const mt = metadata[Object.keys(metadata)[0]];
+
+                //   return mt.is_kibanda_opened === true;
+                // });
+
+                // setVibanda(openedVibanda);
+
+                setTimeout(() => {
+                  setShowAnimation(false);
+                  setFormSubmitLoader(false);
+                  setMessage("");
+                  setIcon("");
+                }, 1000);
+              }}
+              style={{
+                marginRight: 10,
+                flexDirection: "row",
+                alignItems: "center",
+                borderColor: "grey",
+                borderWidth: 1,
+                padding: 6,
+                backgroundColor:
+                  AppCtx.activeFilter.toLowerCase() === "Kilimo".toLowerCase()
+                    ? "grey"
+                    : "transparent",
+              }}
+            >
+              <MaterialCommunityIcons
+                name="door-open"
+                size={14}
+                color={
+                  AppCtx.activeFilter.toLowerCase() === "Kilimo".toLowerCase()
+                    ? "white"
+                    : "grey"
+                }
+              />
+              <Text
+                style={{
+                  color:
+                    AppCtx.activeFilter.toLowerCase() === "Kilimo".toLowerCase()
+                      ? "white"
+                      : "grey",
+                  marginLeft: 4,
+                  fontFamily: "montserrat-17",
+                }}
+              >
+                Kilimo
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                AppCtx.manipulateActiveFilter("Mazingira");
+                // then we'll use this filter..
+                // setShowAnimation(true);
+                // setFormSubmitLoader(true);
+                // setMessage("Fetching");
+                // setIcon("search");
+
+                // filter vibanda which only opened
+                // const openedVibanda = initialVibanda.filter((metadata) => {
+                //   const mt = metadata[Object.keys(metadata)[0]];
+
+                //   return mt.is_kibanda_opened === true;
+                // });
+
+                // setVibanda(openedVibanda);
+
+                // setTimeout(() => {
+                //   setShowAnimation(false);
+                //   setFormSubmitLoader(false);
+                //   setMessage("");
+                //   setIcon("");
+                // }, 1000);
+              }}
+              style={{
+                marginRight: 10,
+                flexDirection: "row",
+                alignItems: "center",
+                borderColor: "grey",
+                borderWidth: 1,
+                padding: 6,
+                backgroundColor:
+                  AppCtx.activeFilter?.toLowerCase() ===
+                  "Mazingira".toLowerCase()
+                    ? "grey"
+                    : "transparent",
+              }}
+            >
+              <MaterialCommunityIcons
+                name="door-open"
+                size={14}
+                color={
+                  AppCtx.activeFilter.toLowerCase() ===
+                  "Mazingira".toLowerCase()
+                    ? "white"
+                    : "grey"
+                }
+              />
+              <Text
+                style={{
+                  color:
+                    AppCtx.activeFilter.toLowerCase() ===
+                    "Mazingira".toLowerCase()
+                      ? "white"
+                      : "grey",
+                  marginLeft: 4,
+                  fontFamily: "montserrat-17",
+                }}
+              >
+                Mazingira
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
         {/* post sections, in future i should use the flatlist here to render post instead of scrollView */}
         <ScrollView
           showsVerticalScrollIndicator={false}
